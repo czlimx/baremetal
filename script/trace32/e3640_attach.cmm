@@ -1,0 +1,58 @@
+; --------------------------------------------------------------------------------
+; @Title: Attach Programming script for Semidrive E3
+;
+; SDRAM: 0x00404000
+;
+; @Author: mingxin.li
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; @Chip: E3*
+; --------------------------------------------------------------------------------
+; $Id: e3640_attach.cmm 10516 2022-02-02 11:39:30Z bschroefel $
+PRIVATE &DEMO_SCRIPT_DIR
+&DEMO_SCRIPT_DIR=OS.PPD()
+
+IF SYStem.INSTANCE()!=1.
+(
+	PRINT %ERROR "This script must be called from MASTER GUI!"
+	ENDDO
+)
+
+; --------------------------------------------------------------------------------
+; Basic setup
+TITLE "TRACE32 for ARM - E3" ; set GUI title
+RESet
+SYStem.RESet
+
+SYStem.CPU CortexR5F
+
+SYStem.CONFIG.DEBUGPORTTYPE SWD
+SYStem.JtagClock 10.Mhz
+SYStem.CONFIG.APBAP.Port 0.
+SYStem.CONFIG.DEBUGAP.port 0.
+SYStem.CONFIG COREDEBUG.Base DAP:0xF2081000
+
+; --------------------------------------------------------------------------------
+; Connect to Cortex-R5F core SF
+SYStem.Attach
+SYStem.MemAccess DAP
+Break
+
+; --------------------------------------------------------------------------------
+; Load the application
+Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../bin/e3640/tryrtos/trycode" /LOADSEC !.stack /PATH \\wsl.localhost\Ubuntu
+
+; --------------------------------------------------------------------------------
+; Open some windows
+; WinCLEAR
+; Mode.Hll
+; WinPOS 0. 0. 128. 60.
+; List.auto
+; WinPOS 134. 0. 80. 18.
+; Frame.view
+; WinPOS 134. 26. 80. 18.
+; Var.Watch
+; Var.AddWatch %SpotLight ast flags
+; WinPOS 230. 0. 36. 36.
+; Register.view /SpotLight
+
+ENDDO

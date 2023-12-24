@@ -1,0 +1,101 @@
+; --------------------------------------------------------------------------------
+; @Title: Simple demo script for Cortex-A53 on AM62X-SKEVM (PSRAM)
+; @Description:
+;   Loads the sieve demo application into PSRAM and sets up a demo debug scenario.
+;   Use this script for getting started.
+;   Prerequisites:
+;    * Connect Debug Cable to J17 via adapter LA-3780
+; @Keywords: ARM, Cortex-A53
+; @Author: CMO
+; @Board: AM62X-SKEVM
+; @Chip: AM625X
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: am62x_sieve_sram.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+PRIVATE &DEMO_SCRIPT_DIR &AUX_SCRIPT_DIR
+&DEMO_SCRIPT_DIR=OS.PPD()
+&AUX_SCRIPT_DIR="&DEMO_SCRIPT_DIR"
+WinCLEAR
+
+IF SYStem.INSTANCE()!=1.
+(
+	PRINT %ERROR "This script must be called from MASTER GUI!"
+	ENDDO
+)
+
+
+; --------------------------------------------------------------------------------
+; Basic setup
+TITLE "TRACE32 for ARM - AM625X-CA53" ; set GUI title
+RESet
+SYStem.RESet
+
+System.CPU AM625X
+SYStem.CONFIG CORE 2. 1.
+CORE.ASSIGN 1. 2. 3. 4.
+SYStem.Option RESBREAK OFF
+SYStem.Option EnReset OFF
+SYSTEM.JTAGCLOCK CTCK 10MHz
+TrOnchip.StepVector ON
+
+IF COMBIPROBE()||UTRACE()
+(
+	SYStem.CONFIG.CONNECTOR MIPI34 ; because of converter LA-3782
+)
+
+; --------------------------------------------------------------------------------
+; Connect to target
+SYStem.Mode Prepare    ; initializes DAP
+
+; --------------------------------------------------------------------------------
+; Warm reset
+Do "&AUX_SCRIPT_DIR/common_setup.cmm" WARM_RESET
+
+; --------------------------------------------------------------------------------
+; Stop Cortex-M4 TIFS boot core to disable watchdog
+Do "&AUX_SCRIPT_DIR/am62x-cm4-sms0-tifs_connect.cmm"
+Do "&AUX_SCRIPT_DIR/am62x-cr5_connect.cmm"
+
+
+; --------------------------------------------------------------------------------
+; Catch A53 via endless loop at boot vector 0x0
+Data.Set EZAXI:0x43C00000 %long 0x14000000    ; catch loop 'b 0x0'
+
+; --------------------------------------------------------------------------------
+; Basic board setup (via AXI system bus accesses)
+
+; Configure PLLs
+Do "&AUX_SCRIPT_DIR/configure_pll.cmm" MAIN
+Do "&AUX_SCRIPT_DIR/configure_pll.cmm" A53
+
+; Enable Power
+; CORE_CTL
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  1. 0x1 0x3    ; LPSC_MAIN_DM
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  4. 0x1 0x3    ; LPSC_DM2MAIN_ISO
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 34. 0x1 0x3    ; LPSC_MAIN_IP
+
+; A53
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 3. 42. 0x1 0x3    ; LPSC_A53_CLUSTER_0
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 4. 45. 0x1 0x3    ; LPSC_A53_0
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 5. 46. 0x1 0x3    ; LPSC_A53_1
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 6. 47. 0x1 0x3    ; LPSC_A53_2
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 7. 48. 0x1 0x3    ; LPSC_A53_3
+
+; --------------------------------------------------------------------------------
+; Connect to Cortex-A53 core
+SYStem.Attach
+Break
+
+; --------------------------------------------------------------------------------
+; Load the application
+;Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../../../build/bin/myboot.elf" /PATH \\wsl.localhost\Ubuntu
+
+; Set PC for all secondary cores
+;Register.Init /CORE 1.
+;Register.Set PC _start /CORE 1.
+;Register.Init /CORE 2.
+;Register.Set PC _start /CORE 2.
+;Register.Init /CORE 3.
+;Register.Set PC _start /CORE 3.
+ENDDO

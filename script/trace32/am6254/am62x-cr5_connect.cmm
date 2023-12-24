@@ -1,0 +1,65 @@
+; --------------------------------------------------------------------------------
+; @Title: Simple demo script for Cortex-R5 on AM62X-SKEVM (ATCM)
+; @Description:
+;   Loads the sieve demo application into ATCM and sets up a demo debug scenario.
+;   Use this script for getting started.
+;   Prerequisites:
+;    * Connect Debug Cable to J17 via adapter LA-3780
+; @Keywords: ARM, Cortex-R5
+; @Author: CMO
+; @Board: AM62X-SKEVM
+; @Chip: AM625X-CR5 
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: am62x-cr5_sieve_sram.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+; --------------------------------------------------------------------------------
+; Prepare AMP GUI
+
+; Close leftover GUIs
+; InterCom OTHERS QUIT
+
+; Open CR5 GUI
+IF !INTERCOM.PING(CR5)
+	TargetSystem.NewInstance CR5 /ARCHitecture ARM
+
+; --------------------------------------------------------------------------------
+; Basic CR5 setup
+InterCom CR5 TITLE "TRACE32 for AM625X-CR5" ; set GUI title
+InterCom CR5 RESet
+InterCom CR5 SYStem.RESet
+
+InterCom CR5 System.CPU AM625X-CR5    ; 'CR5' boot core
+InterCom CR5 SYStem.CONFIG CORE 8. 1.
+InterCom CR5 SYStem.Option RESBREAK OFF
+InterCom CR5 SYStem.Option EnReset OFF
+InterCom CR5 SYSTEM.JTAGCLOCK CTCK 10MHz
+
+; --------------------------------------------------------------------------------
+; Enable ATCM for R5F
+Data.Set EZAXI:(0x45A20000+0x1C100) %Long 0x888
+
+; Enable CPUn_HALT for R5F upon PORz (WKUP_SEC_MMR)
+Data.Set EZAXI:(0x45A20000+0x1C120) %Long 0x1
+
+;  Configure R5F bootvector
+Data.Set EZAXI:(0x45A20000+0x1C110) %Long 0x0
+Data.Set EZAXI:(0x45A20000+0x1C114) %Long 0x0
+
+; --------------------------------------------------------------------------------
+; Reset core via PSC
+PRIVATE  &MAIN_PSC_MDCTL_BASE
+&MAIN_PSC_MDCTL_BASE=0x0400000+0xA00+(0x4*1.)
+
+; Enable reset of core (via LRSTZ)
+Data.Set EZAXI:&(MAIN_PSC_MDCTL_BASE) %Long (Data.Long(EZAXI:&(MAIN_PSC_MDCTL_BASE))&(~0x100))
+
+; Disable reset to start core
+Data.Set EZAXI:&(MAIN_PSC_MDCTL_BASE) %Long (Data.Long(EZAXI:&(MAIN_PSC_MDCTL_BASE))|(0x100))
+
+; --------------------------------------------------------------------------------
+; Connect to CR5 core and halt it in order to disable the 180s boot watchdog
+InterCom CR5 SYStem.Attach
+InterCom CR5 Break
+
+ENDDO

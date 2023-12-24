@@ -1,0 +1,201 @@
+; --------------------------------------------------------------------------------
+; @Props: NoMetaTags
+; @Description:
+;     Helper script to configure Power Sleep Controllers (PSCs) of AM625X
+;
+;     Set a new power state for the specified power domain PD_ID and module
+;     domain MD_ID. Wait for the power transition to complete.
+; @Author: CMO
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: configure_psc.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+
+; Helper script to configure Power Sleep Controllers (PSCs) of AM625X
+
+; Set a new power state for the specified power domain PD_ID and module
+; domain MD_ID. Wait for the power transition to complete.
+
+
+; Script arguments:
+;      DOMAIN
+;          0 = MAIN
+;          1 = MCU
+;
+;      PD_ID - (i) power domain id
+;
+;      MD_ID - (i) module domain id
+;
+;      PD_STATE - (i) new power domain state value to set
+;          0 = PSC_PD_OFF
+;          1 = PSC_PD_ON
+;
+;      MD_STATE - (i) new module domain state value to set
+;          0 = PSC_SYNCRESETDISABLE (IP reset asserted and clock gated)
+;          1 = PSC_SYNCRESET (IP reset asserted and clock running)
+;          2 = PSC_DISABLE (IP reset released and clock gated, MMRs retained)
+;          3 = PSC_ENABLE (IP reset released and clock running)
+
+LOCAL &DOMAIN &PD_ID &MD_ID &PD_STATE &MD_STATE
+ENTRY &DOMAIN &PD_ID &MD_ID &PD_STATE &MD_STATE
+
+LOCAL &PSC_TIMEOUT
+&PSC_TIMEOUT=100.
+
+; Configuration register helper macros
+LOCAL &PSC_BASE &PSC_MDCTL &PSC_MDSTAT &PSC_PDCTL &PSC_PDSTAT &PSC_PTCMD &PSC_PTSTAT
+
+if &DOMAIN==0.
+(
+	; Main domain
+	&PSC_BASE=0x00400000 ; global address space
+)
+else if &DOMAIN==1.
+(
+	; MCU domain
+	&PSC_BASE=0x04000000 ; global address space
+)
+&PSC_MDCTL=&PSC_BASE+0xA00+(0x4*&MD_ID)
+&PSC_MDSTAT=&PSC_BASE+0x800+(0x4*&MD_ID)
+&PSC_PDCTL=&PSC_BASE+0x300+(0x4*&PD_ID)
+&PSC_PDSTAT=&PSC_BASE+0x200+(0x4*&PD_ID)
+&PSC_PTCMD=&PSC_BASE+0x120
+&PSC_PTSTAT=&PSC_BASE+0x128
+
+IF (((Data.Long(EZAXI:(&PSC_PDSTAT))&0x1)==&PD_STATE)&&((Data.Long(EZAXI:(&PSC_MDSTAT))&0x1F)==&MD_STATE))
+(
+	; PRINT "Set_PSC_State(&DOMAIN &PD_ID &MD_ID &PD_STATE &MD_STATE):  No change needed."
+	ENDDO 1.
+)
+
+// --  Wait for GOSTAT to clear
+LOCAL &timeout_cnt
+&timeout_cnt=1.
+WHILE ((&timeout_cnt<&PSC_TIMEOUT)&&(((Data.Long(EZAXI:(&PSC_PTSTAT)))&(0x1<<&PD_ID))!=0x0))
+(
+	&timeout_cnt=&timeout_cnt+1
+)
+// --  Check if we got timeout error while waiting
+IF (&timeout_cnt>=&PSC_TIMEOUT)
+(
+	PRINT "ERROR: Timeout. You are likely attempting to modify the Power Sleep Controller"
+	PRINT "       across a voltage crossing which is currently powered off."
+	PRINT "       Consult the CBASS connectivity diagram and the PSC IP dictionary for more"
+	PRINT "       information."
+	PRINT ""
+	ENDDO 0.
+)
+// --  Set PDCTL NEXT to new state
+
+
+Data.Set EZAXI:(&PSC_PDCTL) %Long ((Data.Long(EZAXI:(&PSC_PDCTL))&(~0x1))|&PD_STATE)
+Data.Set EZAXI:(&PSC_MDCTL) %Long ((Data.Long((EZAXI:&PSC_MDCTL))&(~0x1F))|&MD_STATE)
+Data.Set EZAXI:(&PSC_PTCMD) %Long (Data.Long((EZAXI:&PSC_PTCMD))|(0x1<<&PD_ID))
+
+&timeout_cnt=1.
+WHILE ((&timeout_cnt<&PSC_TIMEOUT)&&(((Data.Long(EZAXI:&PSC_PTSTAT))&(0x1<<&PD_ID))!=0x0))
+(
+	&timeout_cnt=&timeout_cnt+1
+)
+// --  Check if we got timeout error while waiting
+IF (&timeout_cnt>=&PSC_TIMEOUT)
+(
+	PRINT "Timeout Error. State not changed."
+	PRINT ""
+	ENDDO 0.
+)
+// --  Verify power domain and module domain state got changed
+IF (((Data.Long(EZAXI:(&PSC_PDSTAT))&0x1)==&PD_STATE)&&((Data.Long(EZAXI:(&PSC_MDSTAT))&0x1F)==&MD_STATE))
+(
+	PRINT "Power domain &PD_ID and module state &MD_ID changed successfully."
+	ENDDO 1.
+)
+IF ((Data.Long(EZAXI:(&PSC_PDSTAT))&0x1)!=&PD_STATE)
+(
+	PRINT "ERROR: PSC power domain state NOT changed!"
+	PRINT ""
+	ENDDO 0.
+)
+IF (Data.Long(EZAXI:(&PSC_MDSTAT))!=&MD_STATE)
+(
+	PRINT "ERROR: module state NOT changed!"
+	PRINT ""
+	ENDDO 0.
+)
+
+ENDDO 0.
+
+
+
+; --------------------------------------------------------------------------------
+; Usage example configurations. Likely NOT the best fit for the setup of the user.
+; "&AUX_SCRIPT_DIR" must be set as the path to this script.
+;
+;	CORE_CTL - 'MAIN'
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  1. 0x1 0x3    ; LPSC_MAIN_DM
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  4. 0x1 0x3    ; LPSC_DM2MAIN_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 34. 0x1 0x3    ; LPSC_MAIN_IP
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  9. 0x1 0x3    ; LPSC_EMIF_LOCAL
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 15. 0x1 0x3    ; LPSC_GPMC
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 17. 0x1 0x3    ; LPSC_MAIN_MCASP_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 18. 0x1 0x3    ; LPSC_MAIN_MCASP_1
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 19. 0x1 0x3    ; LPSC_MAIN_MCASP_2
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 20. 0x1 0x3    ; LPSC_EMMC_8B
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 21. 0x1 0x3    ; LPSC_EMMC_4B_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 22. 0x1 0x3    ; LPSC_EMMC_4B_1
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 23. 0x1 0x3    ; LPSC_USB_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 24. 0x1 0x3    ; LPSC_USB_1
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 26. 0x1 0x3    ; LPSC_DPHY_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 25. 0x1 0x3    ; LPSC_CSI_RX_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 28. 0x1 0x3    ; LPSC_FSS_OSPI
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 35. 0x1 0x3    ; LPSC_MAIN_MCANSS_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 27. 0x1 0x3    ; LPSC_SMS_COMMON
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 29. 0x1 0x3    ; LPSC_TIFS
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 30. 0x1 0x3    ; LPSC_HSM
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 31. 0x1 0x3    ; LPSC_SA3UL
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 32. 0x1 0x3    ; LPSC_HSM_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 10. 0x1 0x3    ; LPSC_EMIF_CFG_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 11. 0x1 0x3    ; LPSC_EMIF_DATA_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 12. 0x1 0x3    ; LPSC_MAIN_USB0_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 13. 0x1 0x3    ; LPSC_MAIN_USB1_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  5. 0x1 0x3    ; LPSC_DM2MAIN_INFRA_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  3. 0x1 0x3    ; LPSC_MAIN2DM_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  6. 0x1 0x3    ; LPSC_DM2CENTRAL_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  7. 0x1 0x3    ; LPSC_CENTRAL2DM_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  2. 0x1 0x3    ; LPSC_DM_PBIST
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 14. 0x1 0x3    ; LPSC_MAIN_TEST
+;
+;	ICSSM
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 1. 40. 0x1 0x3    ; LPSC_ICSSM
+;
+;	CPSW
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 2. 41. 0x1 0x3    ; LPSC_CPSW3G
+;
+;	A53
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 3. 42. 0x1 0x3    ; LPSC_A53_CLUSTER_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 3. 43. 0x1 0x3    ; LPSC_A53_CLUSTER_0_PBIST
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 3. 44. 0x1 0x3    ; LPSC_A53_CLUSTER_1_PBIST
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 4. 45. 0x1 0x3    ; LPSC_A53_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 5. 46. 0x1 0x3    ; LPSC_A53_1
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 6. 47. 0x1 0x3    ; LPSC_A53_2
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 7. 48. 0x1 0x3    ; LPSC_A53_3
+;
+;	GPU
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 8. 49. 0x1 0x3    ; LPSC_GPU
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 8. 50. 0x1 0x3    ; LPSC_GPU_PBIST
+;
+;	DSS
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 9. 51. 0x1 0x3    ; LPSC_DSS
+;
+;	Core_CTL_MCU
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 0.  2. 0x1 0x3    ; LPSC_MCU2MAIN_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 0.  3. 0x1 0x3    ; LPSC_DM2SAFE_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 0.  4. 0x1 0x3    ; LPSC_MCU2DM_ISO
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 0.  5. 0x1 0x3    ; LPSC_MCU_TEST
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 0.  1. 0x1 0x3    ; LPSC_MAIN2MCU_ISO
+;
+;	MCU_M4F_PowerUp
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 1.  9. 0x1 0x3    ; LPSC_MCU_COMMON
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 1.  6. 0x1 0x3    ; LPSC_MCU_M4F
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 1.  7. 0x1 0x3    ; LPSC_MCU_MCANSS_0
+;	Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 1. 1.  8. 0x1 0x3    ; LPSC_MCU_MCANSS_1

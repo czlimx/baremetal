@@ -1,0 +1,42 @@
+; --------------------------------------------------------------------------------
+; @Title: Serial FLASH Programming script for TI AM571x
+; @Description:
+; Quad Serial FLASH(Micron,N25Q128) is connected to QSPI1_CS0
+;
+; SDRAM: 0x40301000
+;
+; QSPI Register Base : 0x4B300000   
+;
+; @Author: jjeong
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; @Chip: AM571*
+; @Keywords: flash spi
+; --------------------------------------------------------------------------------
+; $Id: am571x-spi.cmm 10516 2022-02-02 11:39:30Z bschroefel $
+
+; --------------------------------------------------------------------------------
+; Basic setup
+TITLE "TRACE32 for ARM - AM5718" ; set GUI title
+;RESet
+SYStem.RESet
+
+SYStem.CPU AM571x
+SYStem.JtagClock 10.Mhz
+SYStem.Option DACR ON
+SYStem.Option RESBREAK OFF
+SYStem.Option ENRESET ON
+SYStem.Option WaitReset OFF 
+TrOnchip.StepVector ON
+
+; --------------------------------------------------------------------------------
+; Connect to Cortex-A8 core
+SYStem.Attach
+Break
+
+//disable interrupt and mmu
+Data.Set C15:0x1 %Long  (Data.Long(C15:0x1)&~(0x1005))
+
+//watchdog disable
+Data.Set A:0x4AE14048 %Long 0x0xAAAA
+Data.Set A:0x4AE14048 %Long 0x0x5555
+

@@ -1,0 +1,47 @@
+; --------------------------------------------------------------------------------
+; @Title: Connection script for TIFS Cortex-M4 on AM62X-SKEVM via AMP GUI
+; @Description:
+;   AMP connection script which stops the TIFS Cortex-M4 boot core.
+;   This will also disable the 180s boot watchdog
+;   Prerequisites:
+;    * Connect Debug Cable to J17 via adapter LA-3780
+; @Keywords: ARM, Cortex-M4
+; @Author: CMO
+; @Board: AM62X-SKEVM
+; @Chip: AM625X-CM4-SMS0
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: am62x-cm4-sms0-tifs_connect.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+
+; --------------------------------------------------------------------------------
+; Prepare AMP GUI
+
+; Close leftover GUIs
+; InterCom OTHERS QUIT
+
+; Open TIFS GUI
+IF !INTERCOM.PING(TIFS)
+	TargetSystem.NewInstance TIFS /ARCHitecture ARM
+
+
+; --------------------------------------------------------------------------------
+; Basic TIFS setup
+InterCom TIFS TITLE "TRACE32 for AM625X-CM4-SMS0 - TIFS" ; set GUI title
+InterCom TIFS RESet
+InterCom TIFS SYStem.RESet
+
+InterCom TIFS System.CPU AM625X-CM4-SMS0    ; 'TIFS' boot core
+InterCom TIFS SYStem.CONFIG CORE 1. 1.
+InterCom TIFS SYStem.Option RESBREAK OFF
+InterCom TIFS SYStem.Option EnReset OFF
+InterCom TIFS SYSTEM.JTAGCLOCK CTCK 10MHz
+
+
+; --------------------------------------------------------------------------------
+; Connect to TIFS core and halt it in order to disable the 180s boot watchdog
+InterCom TIFS SYStem.Attach
+InterCom TIFS Break
+
+
+ENDDO

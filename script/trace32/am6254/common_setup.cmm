@@ -1,0 +1,86 @@
+; --------------------------------------------------------------------------------
+; @Props: NoMetaTags
+; @Description:
+;     - Helper script to set up common chip parts of the TI AM625X.
+;     - Configuration example only. Probably not the best setup for the user.
+; @Author: CMO
+; @Board: AM62X-SKEVM
+; @Chip: AM625X
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+
+ENTRY &PARAM %LINE &SUB_PARAMS
+LOCAL &PARAM
+&PARAM=STRing.UPpeR("&PARAM")
+
+; Helper variables
+LOCAL &_SCRIPTNAME
+&_SCRIPTNAME=OS.PPF()
+&_SCRIPTNAME=OS.FILE.NAME(&_SCRIPTNAME)
+
+IF ("&PARAM"=="WARM_RESET")
+(
+	GOSUB WARM_RESET
+	ENDDO
+)
+ELSE IF ("&PARAM"=="POWER_ON_RESET")
+(
+	GOSUB POWER_ON_RESET
+	ENDDO
+)
+ELSE
+(
+	PRINT %WARNING "&_SCRIPTNAME: Failed to set common configuration. Unknown command: &PARAM"
+)
+
+ENDDO
+
+
+
+WARM_RESET:
+(
+	; Warm reset via WKUP_MMR0_RST_CTRL
+
+	; Unlock registers
+	Data.Set EZAXI:0x43019008 %Long 0x68EF3490
+	Data.Set EZAXI:0x4301900C %Long 0xD172BC5A
+
+	; Trigger reset
+	PRIVATE &WKUP_MMR0_RST_CTRL_REG &RST_CTRL_SW_MAIN_WARMRST &REG_VALUE
+	&WKUP_MMR0_RST_CTRL_REG=43018170
+	&RST_CTRL_SW_MAIN_WARMRST=0x6
+	&RST_CTRL_SW_MAIN_WARMRST_MASK=0xF
+
+	&REG_VALUE=Data.Long(EZAXI:&WKUP_MMR0_RST_CTRL_REG)
+	&REG_VALUE=(&REG_VALUE)&~(&RST_CTRL_SW_MAIN_WARMRST_MASK)|(&RST_CTRL_SW_MAIN_WARMRST)
+
+	Data.Set EZAXI:&WKUP_MMR0_RST_CTRL_REG %Long &REG_VALUE
+
+	SCREEN.WAIT 100.ms
+
+	RETURN
+)
+
+
+POWER_ON_RESET:
+(
+	; Power On reset (POR) via WKUP_MMR0_RST_CTRL
+
+	; Unlock registers
+	Data.Set EZAXI:0x43019008 %Long 0x68EF3490
+	Data.Set EZAXI:0x4301900C %Long 0xD172BC5A
+
+	PRIVATE &WKUP_MMR0_RST_CTRL_REG &RST_CTRL_SW_MAIN_POR &REG_VALUE
+	&WKUP_MMR0_RST_CTRL_REG=43018170
+	&RST_CTRL_SW_MAIN_POR=0x60
+	&RST_CTRL_SW_MAIN_POR_MASK=0xF0
+
+	&REG_VALUE=Data.Long(EZAXI:&WKUP_MMR0_RST_CTRL_REG)
+	&REG_VALUE=(&REG_VALUE)&~(&RST_CTRL_SW_MAIN_POR_MASK)|(&RST_CTRL_SW_MAIN_POR)
+
+	Data.Set EZAXI:&WKUP_MMR0_RST_CTRL_REG %Long &REG_VALUE
+
+	SCREEN.WAIT 100.ms
+
+	RETURN
+)
