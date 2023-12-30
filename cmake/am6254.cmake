@@ -9,7 +9,7 @@ set(MPU_FLAGS       "-march=armv8-a -mtune=cortex-a53 -mabi=lp64 -mlittle-endian
 set(VFP_FLAGS       "")
 set(ASM_FLAGS       "-nostdlib -fno-builtin -DASSEMBLY")
 set(GCC_FLAGS       "-nostdlib -fno-builtin -fdata-sections -ffunction-sections -fno-exceptions -mstrict-align")
-set(COM_FLAGS       "-Wall -Werror -Wextra -Wshadow -Wfatal-errors -Wpointer-arith -Wcast-qual -Winline -Wundef -Wredundant-decls -Wstrict-prototypes")
+set(COM_FLAGS       "-DARCH_CPU_TYPE=64 -Wall -Werror -Wextra -Wshadow -Wfatal-errors -Wpointer-arith -Wcast-qual -Winline -Wundef -Wredundant-decls -Wstrict-prototypes")
 set(SPE_FLAGS       "")
 set(LDD_FLAGS       "-nostdlib -fno-builtin -nodefaultlibs -ffreestanding -nostartfiles -Wl,--gc-sections")
 

@@ -25,7 +25,8 @@ link_directories(${COMPILE_DIRECTORY}/lib)
 target_link_libraries(${PROJECT_NAME} -lgcc)
 
 # Pick up the port specific variables and apply them
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/code/mcore/${MY_ARCH})
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/code/arch)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/code/driver)
 
 # post build command
 add_custom_command(
