@@ -1,10 +1,3 @@
-/**
- * @file arch_compiler.h
- * 
- * @brief CPU architecture related underlying memory access related interfaces.
- * 
- * @copyright Copyright (c) 2023
- */
 #ifndef ARCH_COMPILER_H_
 #define ARCH_COMPILER_H_
 

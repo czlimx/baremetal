@@ -38,13 +38,13 @@ SECTIONS
         . = ALIGN(256);
         *(.stack*)
         . = . + 0x1000;
-        _spel0_stack_top = .;
+        _core0_el3_stack_top = .;
         . = . + 0x1000;
-        _spel1_stack_top = .;
+        _core1_el3_stack_top = .;
         . = . + 0x1000;
-        _spel2_stack_top = .;
+        _core2_el3_stack_top = .;
         . = . + 0x1000;
-        _spel3_stack_top = .;
+        _core3_el3_stack_top = .;
     } >.sdram
 
  /DISCARD/ : { *(.rela*) }

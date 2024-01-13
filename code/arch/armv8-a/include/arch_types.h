@@ -1,11 +1,3 @@
-/**
- * @file arch_types.h
- * 
- * @brief CPU architecture related data type definitions.
- * 
- * @copyright Copyright (c) 2023
- */
-
 #ifndef ARCH_TYPES_H_
 #define ARCH_TYPES_H_
 
