@@ -21,12 +21,14 @@
  * @note  Only EL0 and EL1 cache are enabled, EL2 and EL3 cache are disable by default.
  */
 arch_icache_enable:
+    stp x29, x30, [sp, #0x10]
     bl arch_icahce_invalidate_all
 
     mrs x0, SCTLR_EL1
     orr x0, x0, #(1 << 12)       // I: Instruction caches enabled.
     msr SCTLR_EL1, x0
 
+    ldp x29, x30, [sp, #0x10]
     ret
 
 /**
@@ -79,12 +81,14 @@ arch_icahce_invalidate_range:
  * @note  Only EL0 and EL1 cache are enabled, EL2 and EL3 cache are disable by default.
  */
 arch_dcache_enable:
+    stp x29, x30, [sp, #0x10]
     bl arch_dcahce_invalidate_all
 
     mrs x0, SCTLR_EL1
     orr x0, x0, #(1 << 2)       // C: Data and unified caches enabled.
     msr SCTLR_EL1, x0
 
+    ldp x29, x30, [sp, #0x10]
     ret
 
 /**

@@ -50,6 +50,9 @@ _start:
     /* Goto early init for high level language */
     bl _early_init
 
+loop:
+    b loop
+
 /**
  * @brief Architecture early Trap initialization
  */

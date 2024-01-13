@@ -5,8 +5,8 @@
     .global arch_pmu_cycle_get
     .global arch_pmu_cycle_interrupt_enable
     .global arch_pmu_cycle_interrupt_disable
-    .global arch_pmu_cycle_interrupt_overflow_get
-    .global arch_pmu_cycle_interrupt_overflow_clr
+    .global arch_pmu_cycle_overflow_status_get
+    .global arch_pmu_cycle_overflow_status_clr
 
     .global arch_pmu_event_enable
     .global arch_pmu_event_disable
@@ -16,8 +16,8 @@
     .global arch_pmu_event_increment
     .global arch_pmu_event_interrupt_enable
     .global arch_pmu_event_interrupt_disable
-    .global arch_pmu_event_interrupt_overflow_get
-    .global arch_pmu_event_interrupt_overflow_clr
+    .global arch_pmu_event_overflow_status_get
+    .global arch_pmu_event_overflow_status_clr
 
     .section .text.arch.pmu, "ax"
     .balign 4
@@ -45,19 +45,19 @@ arch_pmu_init:
     bic x0, x0, #(1 << 26)      //  M: This field has no effect on filtering of cycles for EL3 filtering.
     msr PMCCFILTR_EL0, x0
 
-    mrs x0, PMCCFILTR_EL0
+    mrs x0, PMUSERENR_EL0
     orr x0, x0, #(1 << 3)       // ER: Enables EL0 reads of the event counters and EL0 reads and writes of the select register.
     orr x0, x0, #(1 << 2)       // CR: Enables EL0 reads of the cycle counter.
     orr x0, x0, #(1 << 1)       // SW: Enables EL0 writes to the Software increment register.
     orr x0, x0, #(1 << 0)       // EN: Enables EL0 read/write access to PMU registers.
-    msr PMCCFILTR_EL0, x0
+    msr PMUSERENR_EL0, x0
     ret
 
 /**
  * @brief Architecture Performance Monitors Cycle counter enable
  */
 arch_pmu_cycle_enable:
-    mrs x4, PMCNTENSET_EL0
+    mov x4, #0
     orr x4, x4, #(1 << 31)      // C: Enables PMCCNTR_EL0.
     msr PMCNTENSET_EL0, x4
     ret
@@ -66,7 +66,7 @@ arch_pmu_cycle_enable:
  * @brief Architecture Performance Monitors Cycle counter disable
  */
 arch_pmu_cycle_disable:
-    mrs x4, PMCNTENCLR_EL0
+    mov x4, #0
     orr x4, x4, #(1 << 31)      // C: Disable PMCCNTR_EL0.
     msr PMCNTENCLR_EL0, x4
     ret
@@ -93,7 +93,7 @@ arch_pmu_cycle_get:
  * @brief Architecture Performance Monitors Cycle counter interrupt enable
  */
 arch_pmu_cycle_interrupt_enable:
-    mrs x4, PMINTENSET_EL1
+    mov x4, #0
     orr x4, x4, #(1 << 31)      // C: Enable Interrupt request on unsigned overflow of PMCCNTR_EL0.
     msr PMINTENSET_EL1, x4
     ret
@@ -102,7 +102,7 @@ arch_pmu_cycle_interrupt_enable:
  * @brief Architecture Performance Monitors Cycle counter interrupt disable
  */
 arch_pmu_cycle_interrupt_disable:
-    mrs x4, PMINTENCLR_EL1
+    mov x4, #0
     orr x4, x4, #(1 << 31)      // C: Disable Interrupt request on unsigned overflow of PMCCNTR_EL0.
     msr PMINTENCLR_EL1, x4
     ret
@@ -122,7 +122,7 @@ arch_pmu_cycle_overflow_status_get:
  * @brief Architecture Performance Monitors Cycle counter Unsigned overflow flag clear
  */
 arch_pmu_cycle_overflow_status_clr:
-    mrs x4, PMOVSCLR_EL0
+    mov x4, #0
     orr x4, x4, #(1 << 31)      // C: Clear Unsigned overflow flag for PMCCNTR_EL0.
     msr PMOVSCLR_EL0, x4
     ret
@@ -135,7 +135,7 @@ arch_pmu_cycle_overflow_status_clr:
 arch_pmu_event_enable:
     mov x2, #1
     lsl x2, x2, x0
-    mrs x4, PMCNTENSET_EL0
+    mov x4, #0
     orr x4, x4, x2              // C: Enables PMEVCNTR<n>_EL0.
     msr PMCNTENSET_EL0, x4
     ret
@@ -148,7 +148,7 @@ arch_pmu_event_enable:
 arch_pmu_event_disable:
     mov x2, #1
     lsl x2, x2, x0
-    mrs x4, PMCNTENCLR_EL0
+    mov x4, #0
     orr x4, x4, x2              // C: Disable PMEVCNTR<n>_EL0.
     msr PMCNTENCLR_EL0, x4
     ret
@@ -204,7 +204,7 @@ arch_pmu_event_increment:
 arch_pmu_event_interrupt_enable:
     mov x2, #1
     lsl x2, x2, x0
-    mrs x4, PMINTENSET_EL1
+    mov x4, #0
     orr x4, x4, x2             // C: Enable Interrupt request on unsigned overflow of PMEVCNTR<n>_EL0.
     msr PMINTENSET_EL1, x4
     ret
@@ -217,7 +217,7 @@ arch_pmu_event_interrupt_enable:
 arch_pmu_event_interrupt_disable:
     mov x2, #1
     lsl x2, x2, x0
-    mrs x4, PMINTENCLR_EL1
+    mov x4, #0
     orr x4, x4, x2              // C: Disable Interrupt request on unsigned overflow of PMEVCNTR<n>_EL0.
     msr PMINTENCLR_EL1, x4
     ret
@@ -243,7 +243,7 @@ arch_pmu_event_overflow_status_get:
 arch_pmu_event_overflow_status_clr:
     mov x2, #1
     lsl x2, x2, x0
-    mrs x4, PMOVSCLR_EL0
+    mov x4, #0
     orr x4, x4, x2             // C: Clear Unsigned overflow flag for PMEVCNTR<n>_EL0.
     msr PMOVSCLR_EL0, x4
     ret

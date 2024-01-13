@@ -3,6 +3,41 @@
 
 #include "arch_types.h"
 
+typedef enum {
+    ARCH_PMU_SW_INCR = 0x0,
+    ARCH_PMU_L1I_CACHE_REFILL,
+    ARCH_PMU_L1I_TLB_REFILL,
+    ARCH_PMU_L1D_CACHE_REFILL,
+    ARCH_PMU_L1D_CACHE,
+    ARCH_PMU_L1D_TLB_REFILL,
+    ARCH_PMU_LD_RETIRED,
+    ARCH_PMU_ST_RETIRED,
+    ARCH_PMU_INST_RETIRED,
+    ARCH_PMU_EXC_TAKEN,
+    ARCH_PMU_EXC_RETURN,
+    ARCH_PMU_CID_WRITE_RETIRED,
+    ARCH_PMU_PC_WRITE_RETIRED,
+    ARCH_PMU_BR_IMMED_RETIRED,
+    ARCH_PMU_BR_RETURN_RETIRED,
+    ARCH_PMU_UNALIGNED_LDST_RETIRED,
+    ARCH_PMU_BR_MIS_PRED,
+    ARCH_PMU_CPU_CYCLES,
+    ARCH_PMU_BR_PRED,
+    ARCH_PMU_MEM_ACCESS,
+    ARCH_PMU_L1I_CACHE,
+    ARCH_PMU_L1D_CACHE_WB,
+    ARCH_PMU_L2D_CACHE,
+    ARCH_PMU_L2D_CACHE_REFILL,
+    ARCH_PMU_L2D_CACHE_WB,
+    ARCH_PMU_BUS_ACCESS,
+    ARCH_PMU_MEMORY_ERROR,
+    ARCH_PMU_INST_SPEC,
+    ARCH_PMU_TTBR_WRITE_RETIRED,
+    ARCH_PMU_BUS_CYCLES,
+    ARCH_PMU_CHAIN,
+    ARCH_PMU_L1D_CACHE_ALLOCATE
+} arch_pmu_event_identification;
+
 /**
  * @brief Architecture Performance Monitors init
  */
@@ -81,7 +116,7 @@ void arch_pmu_event_set(const uint64_t counter, const uint64_t value);
  * 
  * @return uint64_t The Event counter value
  */
-uint64_t arch_pmu_event_get(void);
+uint64_t arch_pmu_event_get(const uint64_t counter);
 
 /**
  * @brief Architecture Performance Monitors Event counter select event
@@ -89,7 +124,7 @@ uint64_t arch_pmu_event_get(void);
  * @param counter The Event counter ID
  * @param event The Event ID
  */
-void arch_pmu_event_select(const uint64_t counter, const uint64_t event);
+void arch_pmu_event_select(const uint64_t counter, const arch_pmu_event_identification event);
 
 /**
  * @brief Architecture Performance Monitors Event counter sofeware increment

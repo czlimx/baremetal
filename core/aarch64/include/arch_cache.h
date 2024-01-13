@@ -28,7 +28,7 @@ void arch_icahce_invalidate_all(void);
  * @param start The virtual start address of region
  * @param size  The size of region
  */
-void arch_icahce_invalidate_range(void);
+void arch_icahce_invalidate_range(uint64_t start, uint64_t size);
 
 /**
  * @brief Architecture data cache enabled

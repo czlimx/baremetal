@@ -28,8 +28,8 @@ IF SYStem.INSTANCE()!=1.
 ; --------------------------------------------------------------------------------
 ; Basic setup
 TITLE "TRACE32 for ARM - AM625X-CA53" ; set GUI title
-RESet
-SYStem.RESet
+;RESet
+;SYStem.RESet
 
 System.CPU AM625X
 SYStem.CONFIG CORE 2. 1.
