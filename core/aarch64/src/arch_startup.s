@@ -5,7 +5,7 @@
     .extern _el3_vectors
     .extern _core0_el3_stack_top
 
-    .section .text.startup, "ax"
+    .section .text.arch.startup, "ax"
     .balign 4
 
 _start:

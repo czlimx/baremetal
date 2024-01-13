@@ -1,7 +1,8 @@
     .global _el1_vectors
     .global _el2_vectors
     .global _el3_vectors
-    .section .text.vectors, "ax", %progbits
+    
+    .section .text.arch.vectors, "ax", %progbits
 
     /* Vector tables must be placed at a 2KB-aligned address */
     .align	11

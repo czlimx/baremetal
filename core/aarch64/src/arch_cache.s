@@ -12,7 +12,7 @@
     .global arch_dcahce_clean_range
     .global arch_dcahce_flush_range
 
-    .section .text.cache, "ax"
+    .section .text.arch.cache, "ax"
     .balign 4
 
 /**

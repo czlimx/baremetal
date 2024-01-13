@@ -9,8 +9,9 @@ SECTIONS
 {
     .text : {
         . = ALIGN(256);
-        KEEP(*(.text.vectors))
-        *(.text.startup)
+        KEEP(*(.text.arch.vectors))
+        *(.text.arch.startup)
+        *(.text.arch.*)
         *(.text.*)
         *(.text*)
     } >.sdram
