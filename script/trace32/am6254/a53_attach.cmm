@@ -89,7 +89,7 @@ Break
 
 ; --------------------------------------------------------------------------------
 ; Load the application
-Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../../../bin/am6254.elf" /PATH \\wsl.localhost\Ubuntu
+Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../../../bin/am6254.elf" /LOADSEC !.bss /PATH \\wsl.localhost\Ubuntu
 
 ; Set PC for all secondary cores
 ;Register.Init /CORE 1.

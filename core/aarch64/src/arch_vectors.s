@@ -41,7 +41,7 @@ _el1_vectors:
 	.align 7
 	b	.                               // Synchronous
 	.align 7
-	b	_el1_aarch32_irq                // IRQ/vIRQ
+	b	.                               // IRQ/vIRQ
 	.align 7
 	b	.                               // FIQ/vFIQ
 	.align 7
@@ -129,18 +129,16 @@ _el3_vectors:
 	.align 7
 	b	.                               // IRQ/vIRQ
 	.align 7
-	b	_el3_aarch32_fiq                // FIQ/vFIQ
+	b	.                               // FIQ/vFIQ
 	.align 7
 	b	.                               // SError/vSError
 
 _el1_sp0_irq:
 _el1_spx_irq:
 _el1_aarch64_irq:
-_el1_aarch32_irq:
     b .
 
 _el3_sp0_fiq:
 _el3_spx_fiq:
 _el3_aarch64_fiq:
-_el3_aarch32_fiq:
     b .

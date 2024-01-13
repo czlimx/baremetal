@@ -1,9 +1,15 @@
 #include "arch_types.h"
 #include "arch_cache.h"
 #include "arch_pmu.h"
+#include "arch_libc.h"
+
+extern char _bss_start_[], _bss_end_[];
 
 void _early_init(void)
 {
+    /* clear bss section */
+    memset((void*)_bss_start_, 0, _bss_end_ - _bss_start_);
+
     bool status;
     uint64_t value;
     arch_icache_enable();

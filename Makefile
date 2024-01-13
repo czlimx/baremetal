@@ -26,7 +26,7 @@ OBJDUMP		  	 = $(CROSS_COMPILE)objdump
 
 # compile gcc flags
 BUILD_CFLAGS   := -march=armv8-a -mtune=cortex-a53 \
-				  -mlittle-endian \
+				  -mlittle-endian -nostdlib -fno-builtin \
 				  -Wall -Werror -Wextra -Wshadow \
 		   		  -Wfatal-errors -Wpointer-arith \
 		   		  -Wcast-qual -Winline -Wundef \
@@ -54,10 +54,11 @@ core/aarch64/src/arch_vectors.s \
 core/aarch64/src/arch_startup.s \
 core/aarch64/src/arch_cache.s \
 core/aarch64/src/arch_system.s \
-core/aarch64/src/arch_pmu.s
+core/aarch64/src/arch_pmu.s 
 
 CCC_SOURCES = \
-core/aarch64/src/arch_init.c
+core/aarch64/src/arch_init.c \
+core/aarch64/src/arch_libc.c
 
 #######################################
 # build the application
