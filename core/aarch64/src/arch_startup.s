@@ -88,7 +88,6 @@ _trap_early_init:
     bic x0, x0, #(1 << 31)      // TCPAC: Access to CPACR is not trapped.
     bic x0, x0, #(1 << 10)      // TFP: Does not cause any access the registers associated with Advanced SIMD or floating-poin instruction to be trapped.
     msr CPTR_EL2, x0
-
     ret
 
 /**
@@ -113,7 +112,6 @@ _permissions_early_init:
     orr x0, x0, #(1 << 7)       // ITD: The IT instruction functionality is enabled.
     orr x0, x0, #(1 << 5)       // CP15BEN: CP15 barrier operations enabled.
     msr SCTLR_EL1, x0
-
     ret
     
 /**
@@ -151,7 +149,6 @@ _cache_early_init:
     mrs x0, S3_1_C15_C2_1
     bic x0, x0, #(1 << 12)      // SMPEN: Enables data coherency with other cores in the cluster.
     msr S3_1_C15_C2_1, x0
-
     ret
 
 /**
@@ -194,7 +191,6 @@ _exception_early_init:
     orr x0, x0, #(1 << 3)       // SA:  Enable SP alignment check.
     orr x0, x0, #(1 << 1)       //  A:  Enables alignment fault checking.
     msr SCTLR_EL1, x0
-
     ret
 
 /**
@@ -220,7 +216,6 @@ _mmu_early_init:
     orr x0, x0, #(1 << 19)      // WXN: Regions with write permissions are forced XN.
     bic x0, x0, #(1 << 0)       // M: EL1 and EL0 stage 1 MMU disabled.
     msr SCTLR_EL1, x0
-
     ret
 
 /**
@@ -231,5 +226,4 @@ _floating_early_init:
     bic x0, x0, #(3 << 20)      // FPEN: Traps instructions that access registers associated with Advanced SIMD and Floating-point execution
     orr x0, x0, #(3 << 10)      // 0b11: No instructions are trapped.
     msr CPACR_EL1, x0
-
     ret

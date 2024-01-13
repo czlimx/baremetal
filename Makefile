@@ -53,7 +53,8 @@ ASM_SOURCES = \
 core/aarch64/src/arch_vectors.s \
 core/aarch64/src/arch_startup.s \
 core/aarch64/src/arch_cache.s \
-core/aarch64/src/arch_system.s
+core/aarch64/src/arch_system.s \
+core/aarch64/src/arch_pmu.s
 
 CCC_SOURCES = \
 core/aarch64/src/arch_init.c
