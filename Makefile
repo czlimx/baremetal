@@ -5,7 +5,13 @@
 ######################################
 # target
 ######################################
-COMPILE_TARGET = am6254
+ifeq ("$(origin SOC)", "command line")
+  	COMPILE_TARGET := $(SOC)
+else
+	COMPILE_TARGET = am6254
+endif
+
+BUILD_BOARD := CONFIG_$(shell echo $(COMPILE_TARGET) | tr a-z A-Z)
 
 # Build path
 BUILD_DIR = build
@@ -33,7 +39,8 @@ BUILD_CFLAGS   := -march=armv8-a -mtune=cortex-a53 \
 		   		  -Wredundant-decls -Wstrict-prototypes \
 				  -fdata-sections -ffunction-sections \
 				  -fno-exceptions -mstrict-align \
-		   		  -std=c99 -O0 -g -gdwarf-2
+		   		  -std=c99 -O0 -g -gdwarf-2 \
+				  -D$(BUILD_BOARD)
 BUILD_AFLAGS   := -D__ASSEMBLY__
 
 # Generate dependency information

@@ -9,6 +9,25 @@
     .balign 4
 
 _start:
+#if defined(CONFIG_H616)
+    /* Switch to aarch64 mode */
+    .word   0xe59f1024 	    //  ldr	r1, [pc, #36]	; 2002c <_start+0x2c>
+    .word   0xe59f0024 	    //  ldr	r0, [pc, #36]	; 20030 <_start+0x30>
+    .word   0xe5810000 	    //  str	r0, [r1]
+    .word   0xf57ff04f 	    //  dsb	sy
+    .word   0xf57ff06f 	    //  isb	sy
+    .word   0xee1c0f50 	    //  mrc	15, 0, r0, cr12, cr0, {2}
+    .word   0xe3800003 	    //  orr	r0, r0, #3
+    .word   0xee0c0f50 	    //  mcr	15, 0, r0, cr12, cr0, {2}
+    .word   0xf57ff06f 	    //  isb	sy
+    .word   0xe320f003 	    //  wfi
+    .word   0xeafffffd      //  b .
+    .word   0x09010040      //  2002c
+    .word   _normal         //  20030
+#endif
+
+    .align	8
+_normal:
     /* Setup the vector base address */
     ldr x0, = _el1_vectors
     msr VBAR_EL1, x0

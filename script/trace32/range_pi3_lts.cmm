@@ -1,4 +1,6 @@
 ; H616 CORTEX-A53 * 4 configurations
+PRIVATE &DEMO_SCRIPT_DIR &AUX_SCRIPT_DIR
+&DEMO_SCRIPT_DIR=OS.PPD()
 
 ; Core config
 SYStem.CPU ARMV8-A
@@ -29,23 +31,4 @@ Data.Set MD:0x030090B4 %LE %Long 0x0
 Data.Set MD:0x030090B8 %LE %Long 0x0
 
 ; Load the application
-;Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../armv8"
-;Wait 100ms
-;Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../armv7" /PATH \\wsl.localhost\Ubuntu
-;Go
-
-;set MMIO->RVBAR
-;Data.Set MD:0x9010040 %LE %Long 0x00020000
-;DSB
-;Data.Set c15:0x4A7 %Long 0x0
-;ISB
-;Data.Set c15:0x457 %Long 0x0
-;warm reset to switch AArch64
-;Data.Set c15:0x20C  %Long 0x3
-;DMB
-;Data.Set c15:0x5A7 %Long 0x0
-;ISB
-;Data.Set c15:0x457 %Long 0x0
-;WFI
-;Data.Set C15:0x407 %Long 0x0
-;Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../armv7" /PATH \\wsl.localhost\Ubuntu
+Data.LOAD.Elf "&DEMO_SCRIPT_DIR/../../bin/h616.elf" /LOADSEC !.bss /PATH \\wsl.localhost\Ubuntu

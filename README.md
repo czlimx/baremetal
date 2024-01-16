@@ -6,7 +6,7 @@ TI am6254 -> Cortex-A53 -> Armv8-A
 
 # Build
 ```c
-make or make clean
+make SOC=h616/am6254 or make clean
 ```
 
 # Compiler
