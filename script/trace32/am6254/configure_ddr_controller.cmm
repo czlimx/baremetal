@@ -1,0 +1,1444 @@
+; --------------------------------------------------------------------------------
+; @Props: NoMetaTags
+; @Description:
+;    DDR controller configuration script for AM625X-SKEVM.
+; @Author: CMO
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: configure_ddr_controller.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+
+; --------------------------------------------------------------------------------
+; Important:
+;
+; DDR controller configuration script.
+; Pre-configurations need to be applied before executing this script.
+;
+; The script applies one of several configuration options to the external DDR memory
+; of the AM625X-SKEVM evaluation board. This script is designed for bare metal setups.
+; It is likely NOT the best fit for the setup of the user.
+;
+; In general, it is recommended to use provided boot code from Texas Instruments
+; to correctly set up the DDR configuration.
+;
+; --------------------------------------------------------------------------------
+; The configuration was derived from scripts provided by Texas Instruments:
+; --------------------------------------------------------------------------------
+// --  Copyright (c) 2020, Texas Instruments Incorporated
+// --  *
+// --  * Redistribution and use in source and binary forms, with or without
+// --  * modification, are permitted provided that the following conditions
+// --  * are met:
+// --  *
+// --  * *  Redistributions of source code must retain the above copyright
+// --  *    notice, this list of conditions and the following disclaimer.
+// --  *
+// --  * *  Redistributions in binary form must reproduce the above copyright
+// --  *    notice, this list of conditions and the following disclaimer in the
+// --  *    documentation and/or other materials provided with the distribution.
+// --  *
+// --  * *  Neither the name of Texas Instruments Incorporated nor the names of
+// --  *    its contributors may be used to endorse or promote products derived
+// --  *    from this software without specific prior written permission.
+// --  *
+// --  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// --  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// --  * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// --  * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+// --  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// --  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// --  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// --  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// --  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// --  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// --  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// --  * This file was generated with the
+// --  * AM62x SysConfig DDR Subsystem Register Configuration Tool v0.08.00
+// --  * Wed Sep 08 2021 13:32:25 GMT-0500 (Central Daylight Time)
+// --  * DDR Type: DDR4
+// --  * Frequency = 800MHz (1600MTs)
+// --  * Density: 16Gb
+// --  * Number of Ranks: 1
+; --------------------------------------------------------------------------------
+
+
+LOCAL &AUX_SCRIPT_DIR
+&AUX_SCRIPT_DIR=OS.PPD()
+
+; Check if (DDRSS_PI_83__SFR_OFFS[0] == 0x1) && (DDRSS_CTL_342__SFR_OFFS[25] == 0x1)
+IF ((Data.Long(EZAXI:(0x0F308000+0x214c))&0x1)==0x1)&&(((Data.Long(EZAXI:(0x0F308000+0x558)))&0x02000000)==0x02000000)
+(
+	PRINT "DDR programming has already been performed."
+	ENDDO
+)
+
+PRINT "--->>> LPDDR4 Initialization is in progress ... <<<---"
+
+
+Data.Set EZAXI:(0x0F300000+0x020) %Long 0x000001EF
+
+
+GOSUB DDRSS_REGISTER_INIT
+GOSUB DDRSS_INIT_SEQUENCE
+
+PRINT "--->>> LPDDR4 Initialization is DONE! <<<---"
+
+ENDDO
+
+
+DDRSS_REGISTER_INIT:
+(
+	PRINT "--->>> DDR controller programming in progress.. <<<---"
+	Data.Set EZAXI:0x0F308000 %Long 0xA00
+	Data.Set EZAXI:0x0F308004 %Long 0x0
+	Data.Set EZAXI:0x0F308008 %Long 0x0
+	Data.Set EZAXI:0x0F30800C %Long 0x0
+	Data.Set EZAXI:0x0F308010 %Long 0x0
+	Data.Set EZAXI:0x0F308014 %Long 0x0
+	Data.Set EZAXI:0x0F308018 %Long 0x0
+	Data.Set EZAXI:0x0F30801C %Long 0x890B8
+	Data.Set EZAXI:0x0F308020 %Long 0x0
+	Data.Set EZAXI:0x0F308024 %Long 0x0
+	Data.Set EZAXI:0x0F308028 %Long 0x0
+	Data.Set EZAXI:0x0F30802C %Long 0x890B8
+	Data.Set EZAXI:0x0F308030 %Long 0x0
+	Data.Set EZAXI:0x0F308034 %Long 0x0
+	Data.Set EZAXI:0x0F308038 %Long 0x0
+	Data.Set EZAXI:0x0F30803C %Long 0x890B8
+	Data.Set EZAXI:0x0F308040 %Long 0x0
+	Data.Set EZAXI:0x0F308044 %Long 0x0
+	Data.Set EZAXI:0x0F308048 %Long 0x0
+	Data.Set EZAXI:0x0F30804C %Long 0x1010100
+	Data.Set EZAXI:0x0F308050 %Long 0x1000100
+	Data.Set EZAXI:0x0F308054 %Long 0x1000110
+	Data.Set EZAXI:0x0F308058 %Long 0x2010002
+	Data.Set EZAXI:0x0F30805C %Long 0x27100
+	Data.Set EZAXI:0x0F308060 %Long 0x61A80
+	Data.Set EZAXI:0x0F308064 %Long 0x2550255
+	Data.Set EZAXI:0x0F308068 %Long 0x255
+	Data.Set EZAXI:0x0F30806C %Long 0x0
+	Data.Set EZAXI:0x0F308070 %Long 0x0
+	Data.Set EZAXI:0x0F308074 %Long 0x0
+	Data.Set EZAXI:0x0F308078 %Long 0x0
+	Data.Set EZAXI:0x0F30807C %Long 0x0
+	Data.Set EZAXI:0x0F308080 %Long 0x0
+	Data.Set EZAXI:0x0F308084 %Long 0x0
+	Data.Set EZAXI:0x0F308088 %Long 0x0
+	Data.Set EZAXI:0x0F30808C %Long 0x0
+	Data.Set EZAXI:0x0F308090 %Long 0x0
+	Data.Set EZAXI:0x0F308094 %Long 0x0
+	Data.Set EZAXI:0x0F308098 %Long 0x4000918
+	Data.Set EZAXI:0x0F30809C %Long 0x1C1C1C1C
+	Data.Set EZAXI:0x0F3080A0 %Long 0x4000918
+	Data.Set EZAXI:0x0F3080A4 %Long 0x1C1C1C1C
+	Data.Set EZAXI:0x0F3080A8 %Long 0x4000918
+	Data.Set EZAXI:0x0F3080AC %Long 0x1C1C1C1C
+	Data.Set EZAXI:0x0F3080B0 %Long 0x5050404
+	Data.Set EZAXI:0x0F3080B4 %Long 0x2706
+	Data.Set EZAXI:0x0F3080B8 %Long 0x602001D
+	Data.Set EZAXI:0x0F3080BC %Long 0x5001D0B
+	Data.Set EZAXI:0x0F3080C0 %Long 0x270605
+	Data.Set EZAXI:0x0F3080C4 %Long 0x602001D
+	Data.Set EZAXI:0x0F3080C8 %Long 0x5001D0B
+	Data.Set EZAXI:0x0F3080CC %Long 0x270605
+	Data.Set EZAXI:0x0F3080D0 %Long 0x602001D
+	Data.Set EZAXI:0x0F3080D4 %Long 0x7001D0B
+	Data.Set EZAXI:0x0F3080D8 %Long 0x180807
+	Data.Set EZAXI:0x0F3080DC %Long 0x400DB60
+	Data.Set EZAXI:0x0F3080E0 %Long 0x7070009
+	Data.Set EZAXI:0x0F3080E4 %Long 0x1808
+	Data.Set EZAXI:0x0F3080E8 %Long 0x400DB60
+	Data.Set EZAXI:0x0F3080EC %Long 0x7070009
+	Data.Set EZAXI:0x0F3080F0 %Long 0x1808
+	Data.Set EZAXI:0x0F3080F4 %Long 0x400DB60
+	Data.Set EZAXI:0x0F3080F8 %Long 0x3000009
+	Data.Set EZAXI:0x0F3080FC %Long 0xD0C0002
+	Data.Set EZAXI:0x0F308100 %Long 0xD0C0D0C
+	Data.Set EZAXI:0x0F308104 %Long 0x1010000
+	Data.Set EZAXI:0x0F308108 %Long 0x3191919
+	Data.Set EZAXI:0x0F30810C %Long 0xB0B0B0B
+	Data.Set EZAXI:0x0F308110 %Long 0xB0B
+	Data.Set EZAXI:0x0F308114 %Long 0x101
+	Data.Set EZAXI:0x0F308118 %Long 0x0
+	Data.Set EZAXI:0x0F30811C %Long 0x1000000
+	Data.Set EZAXI:0x0F308120 %Long 0x1180803
+	Data.Set EZAXI:0x0F308124 %Long 0x1860
+	Data.Set EZAXI:0x0F308128 %Long 0x118
+	Data.Set EZAXI:0x0F30812C %Long 0x1860
+	Data.Set EZAXI:0x0F308130 %Long 0x118
+	Data.Set EZAXI:0x0F308134 %Long 0x1860
+	Data.Set EZAXI:0x0F308138 %Long 0x5
+	Data.Set EZAXI:0x0F30813C %Long 0x0
+	Data.Set EZAXI:0x0F308140 %Long 0x0
+	Data.Set EZAXI:0x0F308144 %Long 0x0
+	Data.Set EZAXI:0x0F308148 %Long 0x0
+	Data.Set EZAXI:0x0F30814C %Long 0x0
+	Data.Set EZAXI:0x0F308150 %Long 0x0
+	Data.Set EZAXI:0x0F308154 %Long 0x0
+	Data.Set EZAXI:0x0F308158 %Long 0x0
+	Data.Set EZAXI:0x0F30815C %Long 0x90009
+	Data.Set EZAXI:0x0F308160 %Long 0x9
+	Data.Set EZAXI:0x0F308168 %Long 0x0
+	Data.Set EZAXI:0x0F30816C %Long 0x0
+	Data.Set EZAXI:0x0F308170 %Long 0x0
+	Data.Set EZAXI:0x0F308174 %Long 0x0
+	Data.Set EZAXI:0x0F308178 %Long 0x10001
+	Data.Set EZAXI:0x0F30817C %Long 0x25501
+	Data.Set EZAXI:0x0F308180 %Long 0x2550120
+	Data.Set EZAXI:0x0F308184 %Long 0x2550120
+	Data.Set EZAXI:0x0F308188 %Long 0x1200120
+	Data.Set EZAXI:0x0F30818C %Long 0x1200120
+	Data.Set EZAXI:0x0F308190 %Long 0x0
+	Data.Set EZAXI:0x0F308194 %Long 0x0
+	Data.Set EZAXI:0x0F308198 %Long 0x0
+	Data.Set EZAXI:0x0F30819C %Long 0x0
+	Data.Set EZAXI:0x0F3081A0 %Long 0x0
+	Data.Set EZAXI:0x0F3081A4 %Long 0x0
+	Data.Set EZAXI:0x0F3081A8 %Long 0x3010000
+	Data.Set EZAXI:0x0F3081AC %Long 0x10000
+	Data.Set EZAXI:0x0F3081B0 %Long 0x0
+	Data.Set EZAXI:0x0F3081B4 %Long 0x1000000
+	Data.Set EZAXI:0x0F3081B8 %Long 0x80104002
+	Data.Set EZAXI:0x0F3081BC %Long 0x40003
+	Data.Set EZAXI:0x0F3081C0 %Long 0x40005
+	Data.Set EZAXI:0x0F3081C4 %Long 0x30000
+	Data.Set EZAXI:0x0F3081C8 %Long 0x50004
+	Data.Set EZAXI:0x0F3081CC %Long 0x4
+	Data.Set EZAXI:0x0F3081D0 %Long 0x40003
+	Data.Set EZAXI:0x0F3081D4 %Long 0x40005
+	Data.Set EZAXI:0x0F3081D8 %Long 0x0
+	Data.Set EZAXI:0x0F3081DC %Long 0x61800
+	Data.Set EZAXI:0x0F3081E0 %Long 0x61800
+	Data.Set EZAXI:0x0F3081E4 %Long 0x61800
+	Data.Set EZAXI:0x0F3081E8 %Long 0x61800
+	Data.Set EZAXI:0x0F3081EC %Long 0x61800
+	Data.Set EZAXI:0x0F3081F0 %Long 0x0
+	Data.Set EZAXI:0x0F3081F4 %Long 0xAAA0
+	Data.Set EZAXI:0x0F3081F8 %Long 0x61800
+	Data.Set EZAXI:0x0F3081FC %Long 0x61800
+	Data.Set EZAXI:0x0F308200 %Long 0x61800
+	Data.Set EZAXI:0x0F308204 %Long 0x61800
+	Data.Set EZAXI:0x0F308208 %Long 0x61800
+	Data.Set EZAXI:0x0F30820C %Long 0x0
+	Data.Set EZAXI:0x0F308210 %Long 0xAAA0
+	Data.Set EZAXI:0x0F308214 %Long 0x61800
+	Data.Set EZAXI:0x0F308218 %Long 0x61800
+	Data.Set EZAXI:0x0F30821C %Long 0x61800
+	Data.Set EZAXI:0x0F308220 %Long 0x61800
+	Data.Set EZAXI:0x0F308224 %Long 0x61800
+	Data.Set EZAXI:0x0F308228 %Long 0x0
+	Data.Set EZAXI:0x0F30822C %Long 0xAAA0
+	Data.Set EZAXI:0x0F308230 %Long 0x0
+	Data.Set EZAXI:0x0F308234 %Long 0x0
+	Data.Set EZAXI:0x0F308238 %Long 0x0
+	Data.Set EZAXI:0x0F30823C %Long 0x0
+	Data.Set EZAXI:0x0F308240 %Long 0x0
+	Data.Set EZAXI:0x0F308244 %Long 0x0
+	Data.Set EZAXI:0x0F308248 %Long 0x0
+	Data.Set EZAXI:0x0F30824C %Long 0x0
+	Data.Set EZAXI:0x0F308250 %Long 0x0
+	Data.Set EZAXI:0x0F308254 %Long 0x0
+	Data.Set EZAXI:0x0F308258 %Long 0x0
+	Data.Set EZAXI:0x0F30825C %Long 0x0
+	Data.Set EZAXI:0x0F308260 %Long 0x0
+	Data.Set EZAXI:0x0F308264 %Long 0x0
+	Data.Set EZAXI:0x0F308268 %Long 0x0
+	Data.Set EZAXI:0x0F30826C %Long 0x0
+	Data.Set EZAXI:0x0F308270 %Long 0x80C0000
+	Data.Set EZAXI:0x0F308274 %Long 0x80C080C
+	Data.Set EZAXI:0x0F308278 %Long 0x8000000
+	Data.Set EZAXI:0x0F30827C %Long 0x808
+	Data.Set EZAXI:0x0F308280 %Long 0xE0000
+	Data.Set EZAXI:0x0F308284 %Long 0x80808
+	Data.Set EZAXI:0x0F308288 %Long 0xE000000
+	Data.Set EZAXI:0x0F30828C %Long 0x8080800
+	Data.Set EZAXI:0x0F308290 %Long 0x0
+	Data.Set EZAXI:0x0F308294 %Long 0x0E
+	Data.Set EZAXI:0x0F308298 %Long 0x40003
+	Data.Set EZAXI:0x0F30829C %Long 0x7
+	Data.Set EZAXI:0x0F3082A0 %Long 0x0
+	Data.Set EZAXI:0x0F3082A4 %Long 0x0
+	Data.Set EZAXI:0x0F3082A8 %Long 0x0
+	Data.Set EZAXI:0x0F3082AC %Long 0x0
+	Data.Set EZAXI:0x0F3082B0 %Long 0x0
+	Data.Set EZAXI:0x0F3082B4 %Long 0x0
+	Data.Set EZAXI:0x0F3082B8 %Long 0x1000000
+	Data.Set EZAXI:0x0F3082BC %Long 0x0
+	Data.Set EZAXI:0x0F3082C0 %Long 0x1500
+	Data.Set EZAXI:0x0F3082C4 %Long 0x100E
+	Data.Set EZAXI:0x0F3082C8 %Long 0x0
+	Data.Set EZAXI:0x0F3082CC %Long 0x0
+	Data.Set EZAXI:0x0F3082D0 %Long 0x1
+	Data.Set EZAXI:0x0F3082D4 %Long 0x2
+	Data.Set EZAXI:0x0F3082D8 %Long 0xC00
+	Data.Set EZAXI:0x0F3082DC %Long 0x1000
+	Data.Set EZAXI:0x0F3082E0 %Long 0xC00
+	Data.Set EZAXI:0x0F3082E4 %Long 0x1000
+	Data.Set EZAXI:0x0F3082E8 %Long 0xC00
+	Data.Set EZAXI:0x0F3082EC %Long 0x1000
+	Data.Set EZAXI:0x0F3082F0 %Long 0x0
+	Data.Set EZAXI:0x0F3082F4 %Long 0x0
+	Data.Set EZAXI:0x0F3082F8 %Long 0x0
+	Data.Set EZAXI:0x0F3082FC %Long 0x0
+	Data.Set EZAXI:0x0F308300 %Long 0x0
+	Data.Set EZAXI:0x0F308304 %Long 0x0
+	Data.Set EZAXI:0x0F308308 %Long 0x0
+	Data.Set EZAXI:0x0F30830C %Long 0x0
+	Data.Set EZAXI:0x0F308310 %Long 0x0
+	Data.Set EZAXI:0x0F308314 %Long 0x0
+	Data.Set EZAXI:0x0F308318 %Long 0x0
+	Data.Set EZAXI:0x0F30831C %Long 0x0
+	Data.Set EZAXI:0x0F308320 %Long 0x0
+	Data.Set EZAXI:0x0F308324 %Long 0x0
+	Data.Set EZAXI:0x0F308328 %Long 0x0
+	Data.Set EZAXI:0x0F30832C %Long 0x0
+	Data.Set EZAXI:0x0F308330 %Long 0x41400
+	Data.Set EZAXI:0x0F308334 %Long 0x301
+	Data.Set EZAXI:0x0F308338 %Long 0x0
+	Data.Set EZAXI:0x0F30833C %Long 0x414
+	Data.Set EZAXI:0x0F308340 %Long 0x301
+	Data.Set EZAXI:0x0F308344 %Long 0x0
+	Data.Set EZAXI:0x0F308348 %Long 0x414
+	Data.Set EZAXI:0x0F30834C %Long 0x301
+	Data.Set EZAXI:0x0F308350 %Long 0x0
+	Data.Set EZAXI:0x0F308354 %Long 0x414
+	Data.Set EZAXI:0x0F308358 %Long 0x301
+	Data.Set EZAXI:0x0F30835C %Long 0x0
+	Data.Set EZAXI:0x0F308360 %Long 0x414
+	Data.Set EZAXI:0x0F308364 %Long 0x301
+	Data.Set EZAXI:0x0F308368 %Long 0x0
+	Data.Set EZAXI:0x0F30836C %Long 0x414
+	Data.Set EZAXI:0x0F308370 %Long 0x301
+	Data.Set EZAXI:0x0F308374 %Long 0x0
+	Data.Set EZAXI:0x0F308378 %Long 0x0
+	Data.Set EZAXI:0x0F30837C %Long 0x0
+	Data.Set EZAXI:0x0F308380 %Long 0x0
+	Data.Set EZAXI:0x0F308384 %Long 0x0
+	Data.Set EZAXI:0x0F308388 %Long 0x0
+	Data.Set EZAXI:0x0F30838C %Long 0x0
+	Data.Set EZAXI:0x0F308390 %Long 0x0
+	Data.Set EZAXI:0x0F308394 %Long 0x0
+	Data.Set EZAXI:0x0F308398 %Long 0x0
+	Data.Set EZAXI:0x0F30839C %Long 0x0
+	Data.Set EZAXI:0x0F3083A0 %Long 0x0
+	Data.Set EZAXI:0x0F3083A4 %Long 0x0
+	Data.Set EZAXI:0x0F3083A8 %Long 0x0
+	Data.Set EZAXI:0x0F3083AC %Long 0x0
+	Data.Set EZAXI:0x0F3083B0 %Long 0x401
+	Data.Set EZAXI:0x0F3083B4 %Long 0x401
+	Data.Set EZAXI:0x0F3083B8 %Long 0x401
+	Data.Set EZAXI:0x0F3083BC %Long 0x401
+	Data.Set EZAXI:0x0F3083C0 %Long 0x401
+	Data.Set EZAXI:0x0F3083C4 %Long 0x401
+	Data.Set EZAXI:0x0F3083C8 %Long 0x493
+	Data.Set EZAXI:0x0F3083CC %Long 0x493
+	Data.Set EZAXI:0x0F3083D0 %Long 0x493
+	Data.Set EZAXI:0x0F3083D4 %Long 0x493
+	Data.Set EZAXI:0x0F3083D8 %Long 0x493
+	Data.Set EZAXI:0x0F3083DC %Long 0x493
+	Data.Set EZAXI:0x0F3083E0 %Long 0x0
+	Data.Set EZAXI:0x0F3083E4 %Long 0x0
+	Data.Set EZAXI:0x0F3083E8 %Long 0x0
+	Data.Set EZAXI:0x0F3083EC %Long 0x0
+	Data.Set EZAXI:0x0F3083F0 %Long 0x0
+	Data.Set EZAXI:0x0F3083F4 %Long 0x0
+	Data.Set EZAXI:0x0F3083F8 %Long 0x0
+	Data.Set EZAXI:0x0F3083FC %Long 0x0
+	Data.Set EZAXI:0x0F308400 %Long 0x0
+	Data.Set EZAXI:0x0F308404 %Long 0x0
+	Data.Set EZAXI:0x0F308408 %Long 0x0
+	Data.Set EZAXI:0x0F30840C %Long 0x0
+	Data.Set EZAXI:0x0F308410 %Long 0x0
+	Data.Set EZAXI:0x0F308414 %Long 0x0
+	Data.Set EZAXI:0x0F308418 %Long 0x0
+	Data.Set EZAXI:0x0F30841C %Long 0x0
+	Data.Set EZAXI:0x0F308420 %Long 0x0
+	Data.Set EZAXI:0x0F308424 %Long 0x0
+	Data.Set EZAXI:0x0F308428 %Long 0x0
+	Data.Set EZAXI:0x0F30842C %Long 0x0
+	Data.Set EZAXI:0x0F308430 %Long 0x0
+	Data.Set EZAXI:0x0F308434 %Long 0x0
+	Data.Set EZAXI:0x0F308438 %Long 0x0
+	Data.Set EZAXI:0x0F30843C %Long 0x0
+	Data.Set EZAXI:0x0F308440 %Long 0x0
+	Data.Set EZAXI:0x0F308444 %Long 0x0
+	Data.Set EZAXI:0x0F308448 %Long 0x0
+	Data.Set EZAXI:0x0F30844C %Long 0x0
+	Data.Set EZAXI:0x0F308450 %Long 0x0
+	Data.Set EZAXI:0x0F308454 %Long 0x10000
+	Data.Set EZAXI:0x0F308458 %Long 0x0
+	Data.Set EZAXI:0x0F30845C %Long 0x0
+	Data.Set EZAXI:0x0F308460 %Long 0x0
+	Data.Set EZAXI:0x0F308464 %Long 0x101
+	Data.Set EZAXI:0x0F308468 %Long 0x0
+	Data.Set EZAXI:0x0F30846C %Long 0x0
+	Data.Set EZAXI:0x0F308470 %Long 0x0
+	Data.Set EZAXI:0x0F308474 %Long 0x0
+	Data.Set EZAXI:0x0F308478 %Long 0x0
+	Data.Set EZAXI:0x0F30847C %Long 0x0
+	Data.Set EZAXI:0x0F308480 %Long 0x0
+	Data.Set EZAXI:0x0F308484 %Long 0x0
+	Data.Set EZAXI:0x0F308488 %Long 0xC181511
+	Data.Set EZAXI:0x0F30848C %Long 0x304
+	Data.Set EZAXI:0x0F308490 %Long 0x0
+	Data.Set EZAXI:0x0F308494 %Long 0x0
+	Data.Set EZAXI:0x0F308498 %Long 0x0
+	Data.Set EZAXI:0x0F30849C %Long 0x0
+	Data.Set EZAXI:0x0F3084A0 %Long 0x0
+	Data.Set EZAXI:0x0F3084A4 %Long 0x0
+	Data.Set EZAXI:0x0F3084A8 %Long 0x0
+	Data.Set EZAXI:0x0F3084AC %Long 0x0
+	Data.Set EZAXI:0x0F3084B0 %Long 0x0
+	Data.Set EZAXI:0x0F3084B4 %Long 0x0
+	Data.Set EZAXI:0x0F3084B8 %Long 0x0
+	Data.Set EZAXI:0x0F3084BC %Long 0x0
+	Data.Set EZAXI:0x0F3084C0 %Long 0x0
+	Data.Set EZAXI:0x0F3084C4 %Long 0x40000
+	Data.Set EZAXI:0x0F3084C8 %Long 0x800200
+	Data.Set EZAXI:0x0F3084CC %Long 0x0
+	Data.Set EZAXI:0x0F3084D0 %Long 0x2000400
+	Data.Set EZAXI:0x0F3084D4 %Long 0x80
+	Data.Set EZAXI:0x0F3084D8 %Long 0x40000
+	Data.Set EZAXI:0x0F3084DC %Long 0x800200
+	Data.Set EZAXI:0x0F3084E0 %Long 0x0
+	Data.Set EZAXI:0x0F3084E4 %Long 0x0
+	Data.Set EZAXI:0x0F3084E8 %Long 0x0
+	Data.Set EZAXI:0x0F3084EC %Long 0x100
+	Data.Set EZAXI:0x0F3084F0 %Long 0x1010000
+	Data.Set EZAXI:0x0F3084F4 %Long 0x0
+	Data.Set EZAXI:0x0F3084F8 %Long 0x3FFF0000
+	Data.Set EZAXI:0x0F3084FC %Long 0xFFF00
+	Data.Set EZAXI:0x0F308500 %Long 0xFFFFFFFF
+	Data.Set EZAXI:0x0F308504 %Long 0xFFF00
+	Data.Set EZAXI:0x0F308508 %Long 0xA000000
+	Data.Set EZAXI:0x0F30850C %Long 0x1FFFF
+	Data.Set EZAXI:0x0F308510 %Long 0x1010101
+	Data.Set EZAXI:0x0F308514 %Long 0x1010101
+	Data.Set EZAXI:0x0F308518 %Long 0x118
+	Data.Set EZAXI:0x0F30851C %Long 0xC01
+	Data.Set EZAXI:0x0F308520 %Long 0x0
+	Data.Set EZAXI:0x0F308524 %Long 0x0
+	Data.Set EZAXI:0x0F308528 %Long 0x0
+	Data.Set EZAXI:0x0F30852C %Long 0x1000000
+	Data.Set EZAXI:0x0F308530 %Long 0x0
+	Data.Set EZAXI:0x0F308534 %Long 0x10000
+	Data.Set EZAXI:0x0F308538 %Long 0x0
+	Data.Set EZAXI:0x0F30853C %Long 0x0
+	Data.Set EZAXI:0x0F308540 %Long 0x0
+	Data.Set EZAXI:0x0F308544 %Long 0x0
+	Data.Set EZAXI:0x0F308548 %Long 0x0
+	Data.Set EZAXI:0x0F30854C %Long 0x0
+	Data.Set EZAXI:0x0F308550 %Long 0x0
+	Data.Set EZAXI:0x0F308554 %Long 0x0
+	Data.Set EZAXI:0x0F308558 %Long 0x0
+	Data.Set EZAXI:0x0F30855C %Long 0x0
+	Data.Set EZAXI:0x0F308560 %Long 0x0
+	Data.Set EZAXI:0x0F308564 %Long 0x0
+	Data.Set EZAXI:0x0F308568 %Long 0x0
+	Data.Set EZAXI:0x0F30856C %Long 0x0
+	Data.Set EZAXI:0x0F308570 %Long 0x0
+	Data.Set EZAXI:0x0F308574 %Long 0x0
+	Data.Set EZAXI:0x0F308578 %Long 0x0
+	Data.Set EZAXI:0x0F30857C %Long 0x0
+	Data.Set EZAXI:0x0F308580 %Long 0x0
+	Data.Set EZAXI:0x0F308584 %Long 0x0
+	Data.Set EZAXI:0x0F308588 %Long 0x0
+	Data.Set EZAXI:0x0F30858C %Long 0x0
+	Data.Set EZAXI:0x0F308590 %Long 0x0
+	Data.Set EZAXI:0x0F308594 %Long 0x0
+	Data.Set EZAXI:0x0F308598 %Long 0x0
+	Data.Set EZAXI:0x0F30859C %Long 0x0
+	Data.Set EZAXI:0x0F3085A0 %Long 0x0
+	Data.Set EZAXI:0x0F3085A4 %Long 0x0
+	Data.Set EZAXI:0x0F3085A8 %Long 0x0
+	Data.Set EZAXI:0x0F3085AC %Long 0x0
+	Data.Set EZAXI:0x0F3085B0 %Long 0x0
+	Data.Set EZAXI:0x0F3085B4 %Long 0x0
+	Data.Set EZAXI:0x0F3085B8 %Long 0x0
+	Data.Set EZAXI:0x0F3085BC %Long 0x0
+	Data.Set EZAXI:0x0F3085C0 %Long 0x0
+	Data.Set EZAXI:0x0F3085C4 %Long 0x0
+	Data.Set EZAXI:0x0F3085C8 %Long 0xC000000
+	Data.Set EZAXI:0x0F3085CC %Long 0x60C0606
+	Data.Set EZAXI:0x0F3085D0 %Long 0x6060C06
+	Data.Set EZAXI:0x0F3085D4 %Long 0x10101
+	Data.Set EZAXI:0x0F3085D8 %Long 0x2000000
+	Data.Set EZAXI:0x0F3085DC %Long 0x3020101
+	Data.Set EZAXI:0x0F3085E0 %Long 0x303
+	Data.Set EZAXI:0x0F3085E4 %Long 0x2020200
+	Data.Set EZAXI:0x0F3085E8 %Long 0x2020202
+	Data.Set EZAXI:0x0F3085EC %Long 0x2020202
+	Data.Set EZAXI:0x0F3085F0 %Long 0x2020202
+	Data.Set EZAXI:0x0F3085F4 %Long 0x0
+	Data.Set EZAXI:0x0F3085F8 %Long 0x0
+	Data.Set EZAXI:0x0F3085FC %Long 0x4000100
+	Data.Set EZAXI:0x0F308600 %Long 0x1E000004
+	Data.Set EZAXI:0x0F308604 %Long 0x30C0
+	Data.Set EZAXI:0x0F308608 %Long 0x200
+	Data.Set EZAXI:0x0F30860C %Long 0x200
+	Data.Set EZAXI:0x0F308610 %Long 0x200
+	Data.Set EZAXI:0x0F308614 %Long 0x200
+	Data.Set EZAXI:0x0F308618 %Long 0xDB60
+	Data.Set EZAXI:0x0F30861C %Long 0x1E780
+	Data.Set EZAXI:0x0F308620 %Long 0xA0B0302
+	Data.Set EZAXI:0x0F308624 %Long 0x1E090A
+	Data.Set EZAXI:0x0F308628 %Long 0x30C0
+	Data.Set EZAXI:0x0F30862C %Long 0x200
+	Data.Set EZAXI:0x0F308630 %Long 0x200
+	Data.Set EZAXI:0x0F308634 %Long 0x200
+	Data.Set EZAXI:0x0F308638 %Long 0x200
+	Data.Set EZAXI:0x0F30863C %Long 0xDB60
+	Data.Set EZAXI:0x0F308640 %Long 0x1E780
+	Data.Set EZAXI:0x0F308644 %Long 0xA0B0302
+	Data.Set EZAXI:0x0F308648 %Long 0x1E090A
+	Data.Set EZAXI:0x0F30864C %Long 0x30C0
+	Data.Set EZAXI:0x0F308650 %Long 0x200
+	Data.Set EZAXI:0x0F308654 %Long 0x200
+	Data.Set EZAXI:0x0F308658 %Long 0x200
+	Data.Set EZAXI:0x0F30865C %Long 0x200
+	Data.Set EZAXI:0x0F308660 %Long 0xDB60
+	Data.Set EZAXI:0x0F308664 %Long 0x1E780
+	Data.Set EZAXI:0x0F308668 %Long 0xA0B0302
+	Data.Set EZAXI:0x0F30866C %Long 0x90A
+	Data.Set EZAXI:0x0F308670 %Long 0x0
+	Data.Set EZAXI:0x0F308674 %Long 0x302000A
+	Data.Set EZAXI:0x0F308678 %Long 0x1000500
+	Data.Set EZAXI:0x0F30867C %Long 0x1010001
+	Data.Set EZAXI:0x0F308680 %Long 0x10001
+	Data.Set EZAXI:0x0F308684 %Long 0x1010001
+	Data.Set EZAXI:0x0F308688 %Long 0x2010000
+	Data.Set EZAXI:0x0F30868C %Long 0x200
+	Data.Set EZAXI:0x0F308690 %Long 0x2000201
+	Data.Set EZAXI:0x0F308694 %Long 0x0
+	Data.Set EZAXI:0x0F308698 %Long 0x202020
+	PRINT "--->>> DDR controller programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PI programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30A000 %Long 0xA00
+	Data.Set EZAXI:0x0F30A004 %Long 0x0
+	Data.Set EZAXI:0x0F30A008 %Long 0x0
+	Data.Set EZAXI:0x0F30A00C %Long 0x1000000
+	Data.Set EZAXI:0x0F30A010 %Long 0x1
+	Data.Set EZAXI:0x0F30A014 %Long 0x10064
+	Data.Set EZAXI:0x0F30A018 %Long 0x0
+	Data.Set EZAXI:0x0F30A01C %Long 0x0
+	Data.Set EZAXI:0x0F30A020 %Long 0x0
+	Data.Set EZAXI:0x0F30A024 %Long 0x0
+	Data.Set EZAXI:0x0F30A028 %Long 0x0
+	Data.Set EZAXI:0x0F30A02C %Long 0x0
+	Data.Set EZAXI:0x0F30A030 %Long 0x0
+	Data.Set EZAXI:0x0F30A034 %Long 0x10001
+	Data.Set EZAXI:0x0F30A038 %Long 0x0
+	Data.Set EZAXI:0x0F30A03C %Long 0x10001
+	Data.Set EZAXI:0x0F30A040 %Long 0x5
+	Data.Set EZAXI:0x0F30A044 %Long 0x0
+	Data.Set EZAXI:0x0F30A048 %Long 0x0
+	Data.Set EZAXI:0x0F30A04C %Long 0x0
+	Data.Set EZAXI:0x0F30A050 %Long 0x0
+	Data.Set EZAXI:0x0F30A054 %Long 0x0
+	Data.Set EZAXI:0x0F30A058 %Long 0x0
+	Data.Set EZAXI:0x0F30A05C %Long 0x0
+	Data.Set EZAXI:0x0F30A060 %Long 0x280D0001
+	Data.Set EZAXI:0x0F30A064 %Long 0x0
+	Data.Set EZAXI:0x0F30A068 %Long 0x10000
+	Data.Set EZAXI:0x0F30A06C %Long 0x3200
+	Data.Set EZAXI:0x0F30A070 %Long 0x0
+	Data.Set EZAXI:0x0F30A074 %Long 0x0
+	Data.Set EZAXI:0x0F30A078 %Long 0x60602
+	Data.Set EZAXI:0x0F30A07C %Long 0x0
+	Data.Set EZAXI:0x0F30A080 %Long 0x0
+	Data.Set EZAXI:0x0F30A084 %Long 0x0
+	Data.Set EZAXI:0x0F30A088 %Long 0x1
+	Data.Set EZAXI:0x0F30A08C %Long 0x55
+	Data.Set EZAXI:0x0F30A090 %Long 0xAA
+	Data.Set EZAXI:0x0F30A094 %Long 0xAD
+	Data.Set EZAXI:0x0F30A098 %Long 0x52
+	Data.Set EZAXI:0x0F30A09C %Long 0x6A
+	Data.Set EZAXI:0x0F30A0A0 %Long 0x95
+	Data.Set EZAXI:0x0F30A0A4 %Long 0x95
+	Data.Set EZAXI:0x0F30A0A8 %Long 0xAD
+	Data.Set EZAXI:0x0F30A0AC %Long 0x0
+	Data.Set EZAXI:0x0F30A0B0 %Long 0x0
+	Data.Set EZAXI:0x0F30A0B4 %Long 0x10100
+	Data.Set EZAXI:0x0F30A0B8 %Long 0x14
+	Data.Set EZAXI:0x0F30A0BC %Long 0x7D0
+	Data.Set EZAXI:0x0F30A0C0 %Long 0x300
+	Data.Set EZAXI:0x0F30A0C4 %Long 0x0
+	Data.Set EZAXI:0x0F30A0C8 %Long 0x0
+	Data.Set EZAXI:0x0F30A0CC %Long 0x1000000
+	Data.Set EZAXI:0x0F30A0D0 %Long 0x10101
+	Data.Set EZAXI:0x0F30A0D4 %Long 0x1000000
+	Data.Set EZAXI:0x0F30A0D8 %Long 0x0
+	Data.Set EZAXI:0x0F30A0DC %Long 0x10000
+	Data.Set EZAXI:0x0F30A0E0 %Long 0x0
+	Data.Set EZAXI:0x0F30A0E4 %Long 0x0
+	Data.Set EZAXI:0x0F30A0E8 %Long 0x0
+	Data.Set EZAXI:0x0F30A0EC %Long 0x0
+	Data.Set EZAXI:0x0F30A0F0 %Long 0x1400
+	Data.Set EZAXI:0x0F30A0F4 %Long 0x0
+	Data.Set EZAXI:0x0F30A0F8 %Long 0x1000000
+	Data.Set EZAXI:0x0F30A0FC %Long 0x404
+	Data.Set EZAXI:0x0F30A100 %Long 0x1
+	Data.Set EZAXI:0x0F30A104 %Long 0x1010E
+	Data.Set EZAXI:0x0F30A108 %Long 0x2040100
+	Data.Set EZAXI:0x0F30A10C %Long 0x10000
+	Data.Set EZAXI:0x0F30A110 %Long 0x34
+	Data.Set EZAXI:0x0F30A114 %Long 0x0
+	Data.Set EZAXI:0x0F30A118 %Long 0x0
+	Data.Set EZAXI:0x0F30A11C %Long 0x0
+	Data.Set EZAXI:0x0F30A120 %Long 0x0
+	Data.Set EZAXI:0x0F30A124 %Long 0x0
+	Data.Set EZAXI:0x0F30A128 %Long 0x0
+	Data.Set EZAXI:0x0F30A12C %Long 0x5
+	Data.Set EZAXI:0x0F30A130 %Long 0x1000000
+	Data.Set EZAXI:0x0F30A134 %Long 0x4000100
+	Data.Set EZAXI:0x0F30A138 %Long 0x20000
+	Data.Set EZAXI:0x0F30A13C %Long 0x10002
+	Data.Set EZAXI:0x0F30A140 %Long 0x1
+	Data.Set EZAXI:0x0F30A144 %Long 0x20001
+	Data.Set EZAXI:0x0F30A148 %Long 0x20002
+	Data.Set EZAXI:0x0F30A14C %Long 0x0
+	Data.Set EZAXI:0x0F30A150 %Long 0x0
+	Data.Set EZAXI:0x0F30A154 %Long 0x0
+	Data.Set EZAXI:0x0F30A158 %Long 0x0
+	Data.Set EZAXI:0x0F30A15C %Long 0x0
+	Data.Set EZAXI:0x0F30A160 %Long 0x0
+	Data.Set EZAXI:0x0F30A164 %Long 0x0
+	Data.Set EZAXI:0x0F30A168 %Long 0x0
+	Data.Set EZAXI:0x0F30A16C %Long 0x300
+	Data.Set EZAXI:0x0F30A170 %Long 0xA090B0C
+	Data.Set EZAXI:0x0F30A174 %Long 0x4060708
+	Data.Set EZAXI:0x0F30A178 %Long 0x1000005
+	Data.Set EZAXI:0x0F30A17C %Long 0x800
+	Data.Set EZAXI:0x0F30A180 %Long 0x0
+	Data.Set EZAXI:0x0F30A184 %Long 0x10008
+	Data.Set EZAXI:0x0F30A188 %Long 0x0
+	Data.Set EZAXI:0x0F30A18C %Long 0xAA00
+	Data.Set EZAXI:0x0F30A190 %Long 0x0
+	Data.Set EZAXI:0x0F30A194 %Long 0x10000
+	Data.Set EZAXI:0x0F30A198 %Long 0x0
+	Data.Set EZAXI:0x0F30A19C %Long 0x0
+	Data.Set EZAXI:0x0F30A1A0 %Long 0x0
+	Data.Set EZAXI:0x0F30A1A4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1A8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1AC %Long 0x0
+	Data.Set EZAXI:0x0F30A1B0 %Long 0x0
+	Data.Set EZAXI:0x0F30A1B4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1B8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1BC %Long 0x0
+	Data.Set EZAXI:0x0F30A1C0 %Long 0x0
+	Data.Set EZAXI:0x0F30A1C4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1C8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1CC %Long 0x0
+	Data.Set EZAXI:0x0F30A1D0 %Long 0x0
+	Data.Set EZAXI:0x0F30A1D4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1D8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1DC %Long 0x0
+	Data.Set EZAXI:0x0F30A1E0 %Long 0x0
+	Data.Set EZAXI:0x0F30A1E4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1E8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1EC %Long 0x0
+	Data.Set EZAXI:0x0F30A1F0 %Long 0x8
+	Data.Set EZAXI:0x0F30A1F4 %Long 0x0
+	Data.Set EZAXI:0x0F30A1F8 %Long 0x0
+	Data.Set EZAXI:0x0F30A1FC %Long 0x0
+	Data.Set EZAXI:0x0F30A200 %Long 0x0
+	Data.Set EZAXI:0x0F30A204 %Long 0x0
+	Data.Set EZAXI:0x0F30A208 %Long 0x0
+	Data.Set EZAXI:0x0F30A20C %Long 0x0
+	Data.Set EZAXI:0x0F30A210 %Long 0x0
+	Data.Set EZAXI:0x0F30A214 %Long 0x10100
+	Data.Set EZAXI:0x0F30A218 %Long 0x0
+	Data.Set EZAXI:0x0F30A21C %Long 0x0
+	Data.Set EZAXI:0x0F30A220 %Long 0x27100
+	Data.Set EZAXI:0x0F30A224 %Long 0x61A80
+	Data.Set EZAXI:0x0F30A228 %Long 0x100
+	Data.Set EZAXI:0x0F30A22C %Long 0x0
+	Data.Set EZAXI:0x0F30A230 %Long 0x0
+	Data.Set EZAXI:0x0F30A234 %Long 0x0
+	Data.Set EZAXI:0x0F30A238 %Long 0x0
+	Data.Set EZAXI:0x0F30A23C %Long 0x0
+	Data.Set EZAXI:0x0F30A240 %Long 0x1000000
+	Data.Set EZAXI:0x0F30A244 %Long 0x10003
+	Data.Set EZAXI:0x0F30A248 %Long 0x2000101
+	Data.Set EZAXI:0x0F30A24C %Long 0x1030001
+	Data.Set EZAXI:0x0F30A250 %Long 0x10400
+	Data.Set EZAXI:0x0F30A254 %Long 0x6000105
+	Data.Set EZAXI:0x0F30A258 %Long 0x1070001
+	Data.Set EZAXI:0x0F30A25C %Long 0x0
+	Data.Set EZAXI:0x0F30A260 %Long 0x0
+	Data.Set EZAXI:0x0F30A264 %Long 0x0
+	Data.Set EZAXI:0x0F30A268 %Long 0x10000
+	Data.Set EZAXI:0x0F30A26C %Long 0x0
+	Data.Set EZAXI:0x0F30A270 %Long 0x0
+	Data.Set EZAXI:0x0F30A274 %Long 0x0
+	Data.Set EZAXI:0x0F30A278 %Long 0x0
+	Data.Set EZAXI:0x0F30A27C %Long 0x10000
+	Data.Set EZAXI:0x0F30A280 %Long 0x4
+	Data.Set EZAXI:0x0F30A284 %Long 0x0
+	Data.Set EZAXI:0x0F30A288 %Long 0x0
+	Data.Set EZAXI:0x0F30A28C %Long 0x0
+	Data.Set EZAXI:0x0F30A290 %Long 0x7800
+	Data.Set EZAXI:0x0F30A294 %Long 0x780078
+	Data.Set EZAXI:0x0F30A298 %Long 0x141414
+	Data.Set EZAXI:0x0F30A29C %Long 0x38
+	Data.Set EZAXI:0x0F30A2A0 %Long 0x38
+	Data.Set EZAXI:0x0F30A2A4 %Long 0x40038
+	Data.Set EZAXI:0x0F30A2A8 %Long 0x4000400
+	Data.Set EZAXI:0x0F30A2AC %Long 0xC8040009
+	Data.Set EZAXI:0x0F30A2B0 %Long 0x4000918
+	Data.Set EZAXI:0x0F30A2B4 %Long 0x918C8
+	Data.Set EZAXI:0x0F30A2B8 %Long 0x18C804
+	Data.Set EZAXI:0x0F30A2BC %Long 0x118
+	Data.Set EZAXI:0x0F30A2C0 %Long 0x1860
+	Data.Set EZAXI:0x0F30A2C4 %Long 0x118
+	Data.Set EZAXI:0x0F30A2C8 %Long 0x1860
+	Data.Set EZAXI:0x0F30A2CC %Long 0x118
+	Data.Set EZAXI:0x0F30A2D0 %Long 0x4001860
+	Data.Set EZAXI:0x0F30A2D4 %Long 0x1010404
+	Data.Set EZAXI:0x0F30A2D8 %Long 0x1901
+	Data.Set EZAXI:0x0F30A2DC %Long 0x190019
+	Data.Set EZAXI:0x0F30A2E0 %Long 0x10C010C
+	Data.Set EZAXI:0x0F30A2E4 %Long 0x10C
+	Data.Set EZAXI:0x0F30A2E8 %Long 0x0
+	Data.Set EZAXI:0x0F30A2EC %Long 0x3000000
+	Data.Set EZAXI:0x0F30A2F0 %Long 0x1010303
+	Data.Set EZAXI:0x0F30A2F4 %Long 0x1010101
+	Data.Set EZAXI:0x0F30A2F8 %Long 0x181818
+	Data.Set EZAXI:0x0F30A2FC %Long 0x0
+	Data.Set EZAXI:0x0F30A300 %Long 0x0
+	Data.Set EZAXI:0x0F30A304 %Long 0xB000000
+	Data.Set EZAXI:0x0F30A308 %Long 0xA0A0B0B
+	Data.Set EZAXI:0x0F30A30C %Long 0x303030A
+	Data.Set EZAXI:0x0F30A310 %Long 0x0
+	Data.Set EZAXI:0x0F30A314 %Long 0x0
+	Data.Set EZAXI:0x0F30A318 %Long 0x0
+	Data.Set EZAXI:0x0F30A31C %Long 0x0
+	Data.Set EZAXI:0x0F30A320 %Long 0x0
+	Data.Set EZAXI:0x0F30A324 %Long 0x0
+	Data.Set EZAXI:0x0F30A328 %Long 0x0
+	Data.Set EZAXI:0x0F30A32C %Long 0x0
+	Data.Set EZAXI:0x0F30A330 %Long 0x0
+	Data.Set EZAXI:0x0F30A334 %Long 0x0
+	Data.Set EZAXI:0x0F30A338 %Long 0x0
+	Data.Set EZAXI:0x0F30A33C %Long 0x0
+	Data.Set EZAXI:0x0F30A340 %Long 0x0
+	Data.Set EZAXI:0x0F30A344 %Long 0xD090000
+	Data.Set EZAXI:0x0F30A348 %Long 0xD09000D
+	Data.Set EZAXI:0x0F30A34C %Long 0xD09000D
+	Data.Set EZAXI:0x0F30A350 %Long 0x0D
+	Data.Set EZAXI:0x0F30A354 %Long 0x0
+	Data.Set EZAXI:0x0F30A358 %Long 0x0
+	Data.Set EZAXI:0x0F30A35C %Long 0x0
+	Data.Set EZAXI:0x0F30A360 %Long 0x0
+	Data.Set EZAXI:0x0F30A364 %Long 0x16000000
+	Data.Set EZAXI:0x0F30A368 %Long 0x1600C8
+	Data.Set EZAXI:0x0F30A36C %Long 0x1600C8
+	Data.Set EZAXI:0x0F30A370 %Long 0x10100C8
+	Data.Set EZAXI:0x0F30A374 %Long 0x1B01
+	Data.Set EZAXI:0x0F30A378 %Long 0x1F0F0051
+	Data.Set EZAXI:0x0F30A37C %Long 0x3000001
+	Data.Set EZAXI:0x0F30A380 %Long 0x1B0A0B
+	Data.Set EZAXI:0x0F30A384 %Long 0x1F0F0051
+	Data.Set EZAXI:0x0F30A388 %Long 0x3000001
+	Data.Set EZAXI:0x0F30A38C %Long 0x1B0A0B
+	Data.Set EZAXI:0x0F30A390 %Long 0x1F0F0051
+	Data.Set EZAXI:0x0F30A394 %Long 0x3000001
+	Data.Set EZAXI:0x0F30A398 %Long 0xA0B
+	Data.Set EZAXI:0x0F30A39C %Long 0xC0B0700
+	Data.Set EZAXI:0x0F30A3A0 %Long 0xD0605
+	Data.Set EZAXI:0x0F30A3A4 %Long 0xC570
+	Data.Set EZAXI:0x0F30A3A8 %Long 0x1D
+	Data.Set EZAXI:0x0F30A3AC %Long 0x180A0800
+	Data.Set EZAXI:0x0F30A3B0 %Long 0xB071C1C
+	Data.Set EZAXI:0x0F30A3B4 %Long 0xD06050C
+	Data.Set EZAXI:0x0F30A3B8 %Long 0xC570
+	Data.Set EZAXI:0x0F30A3BC %Long 0x1D
+	Data.Set EZAXI:0x0F30A3C0 %Long 0x180A0800
+	Data.Set EZAXI:0x0F30A3C4 %Long 0xB071C1C
+	Data.Set EZAXI:0x0F30A3C8 %Long 0xD06050C
+	Data.Set EZAXI:0x0F30A3CC %Long 0xC570
+	Data.Set EZAXI:0x0F30A3D0 %Long 0x1D
+	Data.Set EZAXI:0x0F30A3D4 %Long 0x180A0800
+	Data.Set EZAXI:0x0F30A3D8 %Long 0x1C1C
+	Data.Set EZAXI:0x0F30A3DC %Long 0x30C0
+	Data.Set EZAXI:0x0F30A3E0 %Long 0x1E780
+	Data.Set EZAXI:0x0F30A3E4 %Long 0x30C0
+	Data.Set EZAXI:0x0F30A3E8 %Long 0x1E780
+	Data.Set EZAXI:0x0F30A3EC %Long 0x30C0
+	Data.Set EZAXI:0x0F30A3F0 %Long 0x1E780
+	Data.Set EZAXI:0x0F30A3F4 %Long 0x2550255
+	Data.Set EZAXI:0x0F30A3F8 %Long 0x3030255
+	Data.Set EZAXI:0x0F30A3FC %Long 0x25503
+	Data.Set EZAXI:0x0F30A400 %Long 0x2550255
+	Data.Set EZAXI:0x0F30A404 %Long 0xC080C08
+	Data.Set EZAXI:0x0F30A408 %Long 0xC08
+	Data.Set EZAXI:0x0F30A40C %Long 0x890B8
+	Data.Set EZAXI:0x0F30A410 %Long 0x0
+	Data.Set EZAXI:0x0F30A414 %Long 0x0
+	Data.Set EZAXI:0x0F30A418 %Long 0x0
+	Data.Set EZAXI:0x0F30A41C %Long 0x120
+	Data.Set EZAXI:0x0F30A420 %Long 0x890B8
+	Data.Set EZAXI:0x0F30A424 %Long 0x0
+	Data.Set EZAXI:0x0F30A428 %Long 0x0
+	Data.Set EZAXI:0x0F30A42C %Long 0x0
+	Data.Set EZAXI:0x0F30A430 %Long 0x120
+	Data.Set EZAXI:0x0F30A434 %Long 0x890B8
+	Data.Set EZAXI:0x0F30A438 %Long 0x0
+	Data.Set EZAXI:0x0F30A43C %Long 0x0
+	Data.Set EZAXI:0x0F30A440 %Long 0x0
+	Data.Set EZAXI:0x0F30A444 %Long 0x2000120
+	Data.Set EZAXI:0x0F30A448 %Long 0x80
+	Data.Set EZAXI:0x0F30A44C %Long 0x20000
+	Data.Set EZAXI:0x0F30A450 %Long 0x80
+	Data.Set EZAXI:0x0F30A454 %Long 0x20000
+	Data.Set EZAXI:0x0F30A458 %Long 0x80
+	Data.Set EZAXI:0x0F30A45C %Long 0x0
+	Data.Set EZAXI:0x0F30A460 %Long 0x0
+	Data.Set EZAXI:0x0F30A464 %Long 0x40404
+	Data.Set EZAXI:0x0F30A468 %Long 0x0
+	Data.Set EZAXI:0x0F30A46C %Long 0x2010102
+	Data.Set EZAXI:0x0F30A470 %Long 0x67676767
+	Data.Set EZAXI:0x0F30A474 %Long 0x202
+	Data.Set EZAXI:0x0F30A478 %Long 0x0
+	Data.Set EZAXI:0x0F30A47C %Long 0x0
+	Data.Set EZAXI:0x0F30A480 %Long 0x0
+	Data.Set EZAXI:0x0F30A484 %Long 0x0
+	Data.Set EZAXI:0x0F30A488 %Long 0x0
+	Data.Set EZAXI:0x0F30A48C %Long 0xD100F00
+	Data.Set EZAXI:0x0F30A490 %Long 0x3020E
+	Data.Set EZAXI:0x0F30A494 %Long 0x1
+	Data.Set EZAXI:0x0F30A498 %Long 0x1000000
+	Data.Set EZAXI:0x0F30A49C %Long 0x20201
+	Data.Set EZAXI:0x0F30A4A0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4A4 %Long 0x414
+	Data.Set EZAXI:0x0F30A4A8 %Long 0x301
+	Data.Set EZAXI:0x0F30A4AC %Long 0x0
+	Data.Set EZAXI:0x0F30A4B0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4B4 %Long 0x0
+	Data.Set EZAXI:0x0F30A4B8 %Long 0x401
+	Data.Set EZAXI:0x0F30A4BC %Long 0x493
+	Data.Set EZAXI:0x0F30A4C0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4C4 %Long 0x414
+	Data.Set EZAXI:0x0F30A4C8 %Long 0x301
+	Data.Set EZAXI:0x0F30A4CC %Long 0x0
+	Data.Set EZAXI:0x0F30A4D0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4D4 %Long 0x0
+	Data.Set EZAXI:0x0F30A4D8 %Long 0x401
+	Data.Set EZAXI:0x0F30A4DC %Long 0x493
+	Data.Set EZAXI:0x0F30A4E0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4E4 %Long 0x414
+	Data.Set EZAXI:0x0F30A4E8 %Long 0x301
+	Data.Set EZAXI:0x0F30A4EC %Long 0x0
+	Data.Set EZAXI:0x0F30A4F0 %Long 0x0
+	Data.Set EZAXI:0x0F30A4F4 %Long 0x0
+	Data.Set EZAXI:0x0F30A4F8 %Long 0x401
+	Data.Set EZAXI:0x0F30A4FC %Long 0x493
+	Data.Set EZAXI:0x0F30A500 %Long 0x0
+	Data.Set EZAXI:0x0F30A504 %Long 0x414
+	Data.Set EZAXI:0x0F30A508 %Long 0x301
+	Data.Set EZAXI:0x0F30A50C %Long 0x0
+	Data.Set EZAXI:0x0F30A510 %Long 0x0
+	Data.Set EZAXI:0x0F30A514 %Long 0x0
+	Data.Set EZAXI:0x0F30A518 %Long 0x401
+	Data.Set EZAXI:0x0F30A51C %Long 0x493
+	Data.Set EZAXI:0x0F30A520 %Long 0x0
+	Data.Set EZAXI:0x0F30A524 %Long 0x414
+	Data.Set EZAXI:0x0F30A528 %Long 0x301
+	Data.Set EZAXI:0x0F30A52C %Long 0x0
+	Data.Set EZAXI:0x0F30A530 %Long 0x0
+	Data.Set EZAXI:0x0F30A534 %Long 0x0
+	Data.Set EZAXI:0x0F30A538 %Long 0x401
+	Data.Set EZAXI:0x0F30A53C %Long 0x493
+	Data.Set EZAXI:0x0F30A540 %Long 0x0
+	Data.Set EZAXI:0x0F30A544 %Long 0x414
+	Data.Set EZAXI:0x0F30A548 %Long 0x301
+	Data.Set EZAXI:0x0F30A54C %Long 0x0
+	Data.Set EZAXI:0x0F30A550 %Long 0x0
+	Data.Set EZAXI:0x0F30A554 %Long 0x0
+	Data.Set EZAXI:0x0F30A558 %Long 0x401
+	Data.Set EZAXI:0x0F30A55C %Long 0x493
+	Data.Set EZAXI:0x0F30A560 %Long 0x0
+	PRINT "--->>> DDR PI programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY Data Slice 0 programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30C000 %Long 0x4C00000
+	Data.Set EZAXI:0x0F30C004 %Long 0x0
+	Data.Set EZAXI:0x0F30C008 %Long 0x200
+	Data.Set EZAXI:0x0F30C00C %Long 0x0
+	Data.Set EZAXI:0x0F30C010 %Long 0x0
+	Data.Set EZAXI:0x0F30C014 %Long 0x0
+	Data.Set EZAXI:0x0F30C018 %Long 0x0
+	Data.Set EZAXI:0x0F30C01C %Long 0x0
+	Data.Set EZAXI:0x0F30C020 %Long 0x1
+	Data.Set EZAXI:0x0F30C024 %Long 0x0
+	Data.Set EZAXI:0x0F30C028 %Long 0x0
+	Data.Set EZAXI:0x0F30C02C %Long 0x10101FF
+	Data.Set EZAXI:0x0F30C030 %Long 0x10000
+	Data.Set EZAXI:0x0F30C034 %Long 0xC00004
+	Data.Set EZAXI:0x0F30C038 %Long 0xCC0008
+	Data.Set EZAXI:0x0F30C03C %Long 0x660201
+	Data.Set EZAXI:0x0F30C040 %Long 0x0
+	Data.Set EZAXI:0x0F30C044 %Long 0x0
+	Data.Set EZAXI:0x0F30C048 %Long 0x0
+	Data.Set EZAXI:0x0F30C04C %Long 0xAAAA
+	Data.Set EZAXI:0x0F30C050 %Long 0x5555
+	Data.Set EZAXI:0x0F30C054 %Long 0xB5B5
+	Data.Set EZAXI:0x0F30C058 %Long 0x4A4A
+	Data.Set EZAXI:0x0F30C05C %Long 0x5656
+	Data.Set EZAXI:0x0F30C060 %Long 0xA9A9
+	Data.Set EZAXI:0x0F30C064 %Long 0xB7B7
+	Data.Set EZAXI:0x0F30C068 %Long 0x4848
+	Data.Set EZAXI:0x0F30C06C %Long 0x0
+	Data.Set EZAXI:0x0F30C070 %Long 0x0
+	Data.Set EZAXI:0x0F30C074 %Long 0x8000000
+	Data.Set EZAXI:0x0F30C078 %Long 0xF000008
+	Data.Set EZAXI:0x0F30C07C %Long 0xF0F
+	Data.Set EZAXI:0x0F30C080 %Long 0xE4E400
+	Data.Set EZAXI:0x0F30C084 %Long 0x70820
+	Data.Set EZAXI:0x0F30C088 %Long 0xC0020
+	Data.Set EZAXI:0x0F30C08C %Long 0x62000
+	Data.Set EZAXI:0x0F30C090 %Long 0x0
+	Data.Set EZAXI:0x0F30C094 %Long 0x55555555
+	Data.Set EZAXI:0x0F30C098 %Long 0xAAAAAAAA
+	Data.Set EZAXI:0x0F30C09C %Long 0x55555555
+	Data.Set EZAXI:0x0F30C0A0 %Long 0xAAAAAAAA
+	Data.Set EZAXI:0x0F30C0A4 %Long 0x5555
+	Data.Set EZAXI:0x0F30C0A8 %Long 0x1000100
+	Data.Set EZAXI:0x0F30C0AC %Long 0x800180
+	Data.Set EZAXI:0x0F30C0B0 %Long 0x0
+	Data.Set EZAXI:0x0F30C0B4 %Long 0x0
+	Data.Set EZAXI:0x0F30C0B8 %Long 0x0
+	Data.Set EZAXI:0x0F30C0BC %Long 0x0
+	Data.Set EZAXI:0x0F30C0C0 %Long 0x0
+	Data.Set EZAXI:0x0F30C0C4 %Long 0x0
+	Data.Set EZAXI:0x0F30C0C8 %Long 0x0
+	Data.Set EZAXI:0x0F30C0CC %Long 0x0
+	Data.Set EZAXI:0x0F30C0D0 %Long 0x0
+	Data.Set EZAXI:0x0F30C0D4 %Long 0x0
+	Data.Set EZAXI:0x0F30C0D8 %Long 0x0
+	Data.Set EZAXI:0x0F30C0DC %Long 0x0
+	Data.Set EZAXI:0x0F30C0E0 %Long 0x0
+	Data.Set EZAXI:0x0F30C0E4 %Long 0x0
+	Data.Set EZAXI:0x0F30C0E8 %Long 0x0
+	Data.Set EZAXI:0x0F30C0EC %Long 0x0
+	Data.Set EZAXI:0x0F30C0F0 %Long 0x0
+	Data.Set EZAXI:0x0F30C0F4 %Long 0x0
+	Data.Set EZAXI:0x0F30C0F8 %Long 0x0
+	Data.Set EZAXI:0x0F30C0FC %Long 0x0
+	Data.Set EZAXI:0x0F30C100 %Long 0x0
+	Data.Set EZAXI:0x0F30C104 %Long 0x4
+	Data.Set EZAXI:0x0F30C108 %Long 0x0
+	Data.Set EZAXI:0x0F30C10C %Long 0x0
+	Data.Set EZAXI:0x0F30C110 %Long 0x0
+	Data.Set EZAXI:0x0F30C114 %Long 0x0
+	Data.Set EZAXI:0x0F30C118 %Long 0x0
+	Data.Set EZAXI:0x0F30C11C %Long 0x0
+	Data.Set EZAXI:0x0F30C120 %Long 0x41F07FF
+	Data.Set EZAXI:0x0F30C124 %Long 0x0
+	Data.Set EZAXI:0x0F30C128 %Long 0x1CCB001
+	Data.Set EZAXI:0x0F30C12C %Long 0x2000CCB0
+	Data.Set EZAXI:0x0F30C130 %Long 0x20000140
+	Data.Set EZAXI:0x0F30C134 %Long 0x7FF0200
+	Data.Set EZAXI:0x0F30C138 %Long 0xDD01
+	Data.Set EZAXI:0x0F30C13C %Long 0x10100303
+	Data.Set EZAXI:0x0F30C140 %Long 0x10101010
+	Data.Set EZAXI:0x0F30C144 %Long 0x10101010
+	Data.Set EZAXI:0x0F30C148 %Long 0x21010
+	Data.Set EZAXI:0x0F30C14C %Long 0x100010
+	Data.Set EZAXI:0x0F30C150 %Long 0x100010
+	Data.Set EZAXI:0x0F30C154 %Long 0x100010
+	Data.Set EZAXI:0x0F30C158 %Long 0x100010
+	Data.Set EZAXI:0x0F30C15C %Long 0x2020010
+	Data.Set EZAXI:0x0F30C160 %Long 0x51515041
+	Data.Set EZAXI:0x0F30C164 %Long 0x31804000
+	Data.Set EZAXI:0x0F30C168 %Long 0x4BF0340
+	Data.Set EZAXI:0x0F30C16C %Long 0x1008080
+	Data.Set EZAXI:0x0F30C170 %Long 0x4050000
+	Data.Set EZAXI:0x0F30C174 %Long 0x504
+	Data.Set EZAXI:0x0F30C178 %Long 0x42100010
+	Data.Set EZAXI:0x0F30C17C %Long 0x10C053E
+	Data.Set EZAXI:0x0F30C180 %Long 0xF0C14
+	Data.Set EZAXI:0x0F30C184 %Long 0x1000140
+	Data.Set EZAXI:0x0F30C188 %Long 0x7A0120
+	Data.Set EZAXI:0x0F30C18C %Long 0xC00
+	Data.Set EZAXI:0x0F30C190 %Long 0x1CC
+	Data.Set EZAXI:0x0F30C194 %Long 0x20100200
+	Data.Set EZAXI:0x0F30C198 %Long 0x5
+	Data.Set EZAXI:0x0F30C19C %Long 0x76543210
+	Data.Set EZAXI:0x0F30C1A0 %Long 0x8
+	Data.Set EZAXI:0x0F30C1A4 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C1A8 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C1AC %Long 0x2800280
+	Data.Set EZAXI:0x0F30C1B0 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C1B4 %Long 0x280
+	Data.Set EZAXI:0x0F30C1B8 %Long 0x8000
+	Data.Set EZAXI:0x0F30C1BC %Long 0x800080
+	Data.Set EZAXI:0x0F30C1C0 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1C4 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1C8 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1CC %Long 0x800080
+	Data.Set EZAXI:0x0F30C1D0 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1D4 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1D8 %Long 0x800080
+	Data.Set EZAXI:0x0F30C1DC %Long 0x1000080
+	Data.Set EZAXI:0x0F30C1E0 %Long 0x1A00000
+	Data.Set EZAXI:0x0F30C1E4 %Long 0x0
+	Data.Set EZAXI:0x0F30C1E8 %Long 0x0
+	Data.Set EZAXI:0x0F30C1EC %Long 0x80200
+	Data.Set EZAXI:0x0F30C1F0 %Long 0x0
+	Data.Set EZAXI:0x0F30C1F4 %Long 0x0
+	PRINT "--->>> DDR PHY Data Slice 0 programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY Data Slice 1 programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30C400 %Long 0x4C00000
+	Data.Set EZAXI:0x0F30C404 %Long 0x0
+	Data.Set EZAXI:0x0F30C408 %Long 0x200
+	Data.Set EZAXI:0x0F30C40C %Long 0x0
+	Data.Set EZAXI:0x0F30C410 %Long 0x0
+	Data.Set EZAXI:0x0F30C414 %Long 0x0
+	Data.Set EZAXI:0x0F30C418 %Long 0x0
+	Data.Set EZAXI:0x0F30C41C %Long 0x0
+	Data.Set EZAXI:0x0F30C420 %Long 0x1
+	Data.Set EZAXI:0x0F30C424 %Long 0x0
+	Data.Set EZAXI:0x0F30C428 %Long 0x0
+	Data.Set EZAXI:0x0F30C42C %Long 0x10101FF
+	Data.Set EZAXI:0x0F30C430 %Long 0x10000
+	Data.Set EZAXI:0x0F30C434 %Long 0xC00004
+	Data.Set EZAXI:0x0F30C438 %Long 0xCC0008
+	Data.Set EZAXI:0x0F30C43C %Long 0x660201
+	Data.Set EZAXI:0x0F30C440 %Long 0x0
+	Data.Set EZAXI:0x0F30C444 %Long 0x0
+	Data.Set EZAXI:0x0F30C448 %Long 0x0
+	Data.Set EZAXI:0x0F30C44C %Long 0xAAAA
+	Data.Set EZAXI:0x0F30C450 %Long 0x5555
+	Data.Set EZAXI:0x0F30C454 %Long 0xB5B5
+	Data.Set EZAXI:0x0F30C458 %Long 0x4A4A
+	Data.Set EZAXI:0x0F30C45C %Long 0x5656
+	Data.Set EZAXI:0x0F30C460 %Long 0xA9A9
+	Data.Set EZAXI:0x0F30C464 %Long 0xB7B7
+	Data.Set EZAXI:0x0F30C468 %Long 0x4848
+	Data.Set EZAXI:0x0F30C46C %Long 0x0
+	Data.Set EZAXI:0x0F30C470 %Long 0x0
+	Data.Set EZAXI:0x0F30C474 %Long 0x8000000
+	Data.Set EZAXI:0x0F30C478 %Long 0xF000008
+	Data.Set EZAXI:0x0F30C47C %Long 0xF0F
+	Data.Set EZAXI:0x0F30C480 %Long 0xE4E400
+	Data.Set EZAXI:0x0F30C484 %Long 0x70820
+	Data.Set EZAXI:0x0F30C488 %Long 0xC0020
+	Data.Set EZAXI:0x0F30C48C %Long 0x62000
+	Data.Set EZAXI:0x0F30C490 %Long 0x0
+	Data.Set EZAXI:0x0F30C494 %Long 0x55555555
+	Data.Set EZAXI:0x0F30C498 %Long 0xAAAAAAAA
+	Data.Set EZAXI:0x0F30C49C %Long 0x55555555
+	Data.Set EZAXI:0x0F30C4A0 %Long 0xAAAAAAAA
+	Data.Set EZAXI:0x0F30C4A4 %Long 0x5555
+	Data.Set EZAXI:0x0F30C4A8 %Long 0x1000100
+	Data.Set EZAXI:0x0F30C4AC %Long 0x800180
+	Data.Set EZAXI:0x0F30C4B0 %Long 0x0
+	Data.Set EZAXI:0x0F30C4B4 %Long 0x0
+	Data.Set EZAXI:0x0F30C4B8 %Long 0x0
+	Data.Set EZAXI:0x0F30C4BC %Long 0x0
+	Data.Set EZAXI:0x0F30C4C0 %Long 0x0
+	Data.Set EZAXI:0x0F30C4C4 %Long 0x0
+	Data.Set EZAXI:0x0F30C4C8 %Long 0x0
+	Data.Set EZAXI:0x0F30C4CC %Long 0x0
+	Data.Set EZAXI:0x0F30C4D0 %Long 0x0
+	Data.Set EZAXI:0x0F30C4D4 %Long 0x0
+	Data.Set EZAXI:0x0F30C4D8 %Long 0x0
+	Data.Set EZAXI:0x0F30C4DC %Long 0x0
+	Data.Set EZAXI:0x0F30C4E0 %Long 0x0
+	Data.Set EZAXI:0x0F30C4E4 %Long 0x0
+	Data.Set EZAXI:0x0F30C4E8 %Long 0x0
+	Data.Set EZAXI:0x0F30C4EC %Long 0x0
+	Data.Set EZAXI:0x0F30C4F0 %Long 0x0
+	Data.Set EZAXI:0x0F30C4F4 %Long 0x0
+	Data.Set EZAXI:0x0F30C4F8 %Long 0x0
+	Data.Set EZAXI:0x0F30C4FC %Long 0x0
+	Data.Set EZAXI:0x0F30C500 %Long 0x0
+	Data.Set EZAXI:0x0F30C504 %Long 0x4
+	Data.Set EZAXI:0x0F30C508 %Long 0x0
+	Data.Set EZAXI:0x0F30C50C %Long 0x0
+	Data.Set EZAXI:0x0F30C510 %Long 0x0
+	Data.Set EZAXI:0x0F30C514 %Long 0x0
+	Data.Set EZAXI:0x0F30C518 %Long 0x0
+	Data.Set EZAXI:0x0F30C51C %Long 0x0
+	Data.Set EZAXI:0x0F30C520 %Long 0x41F07FF
+	Data.Set EZAXI:0x0F30C524 %Long 0x0
+	Data.Set EZAXI:0x0F30C528 %Long 0x1CCB001
+	Data.Set EZAXI:0x0F30C52C %Long 0x2000CCB0
+	Data.Set EZAXI:0x0F30C530 %Long 0x20000140
+	Data.Set EZAXI:0x0F30C534 %Long 0x7FF0200
+	Data.Set EZAXI:0x0F30C538 %Long 0xDD01
+	Data.Set EZAXI:0x0F30C53C %Long 0x10100303
+	Data.Set EZAXI:0x0F30C540 %Long 0x10101010
+	Data.Set EZAXI:0x0F30C544 %Long 0x10101010
+	Data.Set EZAXI:0x0F30C548 %Long 0x21010
+	Data.Set EZAXI:0x0F30C54C %Long 0x100010
+	Data.Set EZAXI:0x0F30C550 %Long 0x100010
+	Data.Set EZAXI:0x0F30C554 %Long 0x100010
+	Data.Set EZAXI:0x0F30C558 %Long 0x100010
+	Data.Set EZAXI:0x0F30C55C %Long 0x2020010
+	Data.Set EZAXI:0x0F30C560 %Long 0x51515041
+	Data.Set EZAXI:0x0F30C564 %Long 0x31804000
+	Data.Set EZAXI:0x0F30C568 %Long 0x4BF0340
+	Data.Set EZAXI:0x0F30C56C %Long 0x1008080
+	Data.Set EZAXI:0x0F30C570 %Long 0x4050000
+	Data.Set EZAXI:0x0F30C574 %Long 0x504
+	Data.Set EZAXI:0x0F30C578 %Long 0x42100010
+	Data.Set EZAXI:0x0F30C57C %Long 0x10C053E
+	Data.Set EZAXI:0x0F30C580 %Long 0xF0C14
+	Data.Set EZAXI:0x0F30C584 %Long 0x1000140
+	Data.Set EZAXI:0x0F30C588 %Long 0x7A0120
+	Data.Set EZAXI:0x0F30C58C %Long 0xC00
+	Data.Set EZAXI:0x0F30C590 %Long 0x1CC
+	Data.Set EZAXI:0x0F30C594 %Long 0x20100200
+	Data.Set EZAXI:0x0F30C598 %Long 0x5
+	Data.Set EZAXI:0x0F30C59C %Long 0x76543210
+	Data.Set EZAXI:0x0F30C5A0 %Long 0x8
+	Data.Set EZAXI:0x0F30C5A4 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C5A8 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C5AC %Long 0x2800280
+	Data.Set EZAXI:0x0F30C5B0 %Long 0x2800280
+	Data.Set EZAXI:0x0F30C5B4 %Long 0x280
+	Data.Set EZAXI:0x0F30C5B8 %Long 0x8000
+	Data.Set EZAXI:0x0F30C5BC %Long 0x800080
+	Data.Set EZAXI:0x0F30C5C0 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5C4 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5C8 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5CC %Long 0x800080
+	Data.Set EZAXI:0x0F30C5D0 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5D4 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5D8 %Long 0x800080
+	Data.Set EZAXI:0x0F30C5DC %Long 0x1000080
+	Data.Set EZAXI:0x0F30C5E0 %Long 0x1A00000
+	Data.Set EZAXI:0x0F30C5E4 %Long 0x0
+	Data.Set EZAXI:0x0F30C5E8 %Long 0x0
+	Data.Set EZAXI:0x0F30C5EC %Long 0x80200
+	Data.Set EZAXI:0x0F30C5F0 %Long 0x0
+	Data.Set EZAXI:0x0F30C5F4 %Long 0x0
+	PRINT "--->>> DDR PHY Data Slice 1 programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY Address Slice 0 programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30C800 %Long 0x100
+	Data.Set EZAXI:0x0F30C804 %Long 0x0
+	Data.Set EZAXI:0x0F30C808 %Long 0x0
+	Data.Set EZAXI:0x0F30C80C %Long 0x0
+	Data.Set EZAXI:0x0F30C810 %Long 0x0
+	Data.Set EZAXI:0x0F30C814 %Long 0x100
+	Data.Set EZAXI:0x0F30C818 %Long 0x0
+	Data.Set EZAXI:0x0F30C81C %Long 0x0
+	Data.Set EZAXI:0x0F30C820 %Long 0x0
+	Data.Set EZAXI:0x0F30C824 %Long 0x0
+	Data.Set EZAXI:0x0F30C828 %Long 0x0
+	Data.Set EZAXI:0x0F30C82C %Long 0x0
+	Data.Set EZAXI:0x0F30C830 %Long 0x0
+	Data.Set EZAXI:0x0F30C834 %Long 0xDCBA98
+	Data.Set EZAXI:0x0F30C838 %Long 0x0
+	Data.Set EZAXI:0x0F30C83C %Long 0x0
+	Data.Set EZAXI:0x0F30C840 %Long 0x0
+	Data.Set EZAXI:0x0F30C844 %Long 0x0
+	Data.Set EZAXI:0x0F30C848 %Long 0x0
+	Data.Set EZAXI:0x0F30C84C %Long 0x0
+	Data.Set EZAXI:0x0F30C850 %Long 0x0
+	Data.Set EZAXI:0x0F30C854 %Long 0x0
+	Data.Set EZAXI:0x0F30C858 %Long 0x0
+	Data.Set EZAXI:0x0F30C85C %Long 0x0
+	Data.Set EZAXI:0x0F30C860 %Long 0x0
+	Data.Set EZAXI:0x0F30C864 %Long 0x0
+	Data.Set EZAXI:0x0F30C868 %Long 0x0
+	Data.Set EZAXI:0x0F30C86C %Long 0x0
+	Data.Set EZAXI:0x0F30C870 %Long 0xA418820
+	Data.Set EZAXI:0x0F30C874 %Long 0x103F0000
+	Data.Set EZAXI:0x0F30C878 %Long 0xF0100
+	Data.Set EZAXI:0x0F30C87C %Long 0x0F
+	Data.Set EZAXI:0x0F30C880 %Long 0x20002CC
+	Data.Set EZAXI:0x0F30C884 %Long 0x30000
+	Data.Set EZAXI:0x0F30C888 %Long 0x300
+	Data.Set EZAXI:0x0F30C88C %Long 0x300
+	Data.Set EZAXI:0x0F30C890 %Long 0x300
+	Data.Set EZAXI:0x0F30C894 %Long 0x300
+	Data.Set EZAXI:0x0F30C898 %Long 0x300
+	Data.Set EZAXI:0x0F30C89C %Long 0x42080010
+	Data.Set EZAXI:0x0F30C8A0 %Long 0x3E
+	Data.Set EZAXI:0x0F30C8A4 %Long 0x0
+	Data.Set EZAXI:0x0F30C8A8 %Long 0x0
+	PRINT "--->>> DDR PHY Data Slice 2 programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY Address Slice 1 programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30CC00 %Long 0x100
+	Data.Set EZAXI:0x0F30CC04 %Long 0x0
+	Data.Set EZAXI:0x0F30CC08 %Long 0x0
+	Data.Set EZAXI:0x0F30CC0C %Long 0x0
+	Data.Set EZAXI:0x0F30CC10 %Long 0x0
+	Data.Set EZAXI:0x0F30CC14 %Long 0x100
+	Data.Set EZAXI:0x0F30CC18 %Long 0x0
+	Data.Set EZAXI:0x0F30CC1C %Long 0x0
+	Data.Set EZAXI:0x0F30CC20 %Long 0x0
+	Data.Set EZAXI:0x0F30CC24 %Long 0x0
+	Data.Set EZAXI:0x0F30CC28 %Long 0x0
+	Data.Set EZAXI:0x0F30CC2C %Long 0x0
+	Data.Set EZAXI:0x0F30CC30 %Long 0x0
+	Data.Set EZAXI:0x0F30CC34 %Long 0xDCBA98
+	Data.Set EZAXI:0x0F30CC38 %Long 0x0
+	Data.Set EZAXI:0x0F30CC3C %Long 0x0
+	Data.Set EZAXI:0x0F30CC40 %Long 0x0
+	Data.Set EZAXI:0x0F30CC44 %Long 0x0
+	Data.Set EZAXI:0x0F30CC48 %Long 0x0
+	Data.Set EZAXI:0x0F30CC4C %Long 0x0
+	Data.Set EZAXI:0x0F30CC50 %Long 0x0
+	Data.Set EZAXI:0x0F30CC54 %Long 0x0
+	Data.Set EZAXI:0x0F30CC58 %Long 0x0
+	Data.Set EZAXI:0x0F30CC5C %Long 0x0
+	Data.Set EZAXI:0x0F30CC60 %Long 0x0
+	Data.Set EZAXI:0x0F30CC64 %Long 0x0
+	Data.Set EZAXI:0x0F30CC68 %Long 0x0
+	Data.Set EZAXI:0x0F30CC6C %Long 0x0
+	Data.Set EZAXI:0x0F30CC70 %Long 0x16A4A0E6
+	Data.Set EZAXI:0x0F30CC74 %Long 0x103F0000
+	Data.Set EZAXI:0x0F30CC78 %Long 0xF0000
+	Data.Set EZAXI:0x0F30CC7C %Long 0x0F
+	Data.Set EZAXI:0x0F30CC80 %Long 0x20002CC
+	Data.Set EZAXI:0x0F30CC84 %Long 0x30000
+	Data.Set EZAXI:0x0F30CC88 %Long 0x300
+	Data.Set EZAXI:0x0F30CC8C %Long 0x300
+	Data.Set EZAXI:0x0F30CC90 %Long 0x300
+	Data.Set EZAXI:0x0F30CC94 %Long 0x300
+	Data.Set EZAXI:0x0F30CC98 %Long 0x300
+	Data.Set EZAXI:0x0F30CC9C %Long 0x42080010
+	Data.Set EZAXI:0x0F30CCA0 %Long 0x3E
+	Data.Set EZAXI:0x0F30CCA4 %Long 0x0
+	Data.Set EZAXI:0x0F30CCA8 %Long 0x0
+	PRINT "--->>> DDR PHY Address Slice 1 programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY Address slice 2 programming in progress.. <<<---\n"
+	Data.Set EZAXI:0x0F30D000 %Long 0x100
+	Data.Set EZAXI:0x0F30D004 %Long 0x0
+	Data.Set EZAXI:0x0F30D008 %Long 0x0
+	Data.Set EZAXI:0x0F30D00C %Long 0x0
+	Data.Set EZAXI:0x0F30D010 %Long 0x0
+	Data.Set EZAXI:0x0F30D014 %Long 0x100
+	Data.Set EZAXI:0x0F30D018 %Long 0x0
+	Data.Set EZAXI:0x0F30D01C %Long 0x0
+	Data.Set EZAXI:0x0F30D020 %Long 0x0
+	Data.Set EZAXI:0x0F30D024 %Long 0x0
+	Data.Set EZAXI:0x0F30D028 %Long 0x0
+	Data.Set EZAXI:0x0F30D02C %Long 0x0
+	Data.Set EZAXI:0x0F30D030 %Long 0x0
+	Data.Set EZAXI:0x0F30D034 %Long 0xDCBA98
+	Data.Set EZAXI:0x0F30D038 %Long 0x0
+	Data.Set EZAXI:0x0F30D03C %Long 0x0
+	Data.Set EZAXI:0x0F30D040 %Long 0x0
+	Data.Set EZAXI:0x0F30D044 %Long 0x0
+	Data.Set EZAXI:0x0F30D048 %Long 0x0
+	Data.Set EZAXI:0x0F30D04C %Long 0x0
+	Data.Set EZAXI:0x0F30D050 %Long 0x0
+	Data.Set EZAXI:0x0F30D054 %Long 0x0
+	Data.Set EZAXI:0x0F30D058 %Long 0x0
+	Data.Set EZAXI:0x0F30D05C %Long 0x0
+	Data.Set EZAXI:0x0F30D060 %Long 0x0
+	Data.Set EZAXI:0x0F30D064 %Long 0x0
+	Data.Set EZAXI:0x0F30D068 %Long 0x0
+	Data.Set EZAXI:0x0F30D06C %Long 0x0
+	Data.Set EZAXI:0x0F30D070 %Long 0x2307B9AC
+	Data.Set EZAXI:0x0F30D074 %Long 0x10030000
+	Data.Set EZAXI:0x0F30D078 %Long 0xF0000
+	Data.Set EZAXI:0x0F30D07C %Long 0x0F
+	Data.Set EZAXI:0x0F30D080 %Long 0x20002CC
+	Data.Set EZAXI:0x0F30D084 %Long 0x30000
+	Data.Set EZAXI:0x0F30D088 %Long 0x300
+	Data.Set EZAXI:0x0F30D08C %Long 0x300
+	Data.Set EZAXI:0x0F30D090 %Long 0x300
+	Data.Set EZAXI:0x0F30D094 %Long 0x300
+	Data.Set EZAXI:0x0F30D098 %Long 0x300
+	Data.Set EZAXI:0x0F30D09C %Long 0x42080010
+	Data.Set EZAXI:0x0F30D0A0 %Long 0x3E
+	Data.Set EZAXI:0x0F30D0A4 %Long 0x0
+	Data.Set EZAXI:0x0F30D0A8 %Long 0x0
+	PRINT "--->>> DDR PHY Address Slice 2 programming completed... <<<---\n"
+
+
+	PRINT "--->>> DDR PHY programming in progress.. <<<---\n"
+	PRINT "--->>> Set PHY registers for all FSPs simultaneously (multicast)... <<<---\n"
+	Data.Set EZAXI:0x0F30D404 %Long 0x100
+	Data.Set EZAXI:0x0F30D400 %Long 0x0
+	Data.Set EZAXI:0x0F30D404 %Long 0x100
+	Data.Set EZAXI:0x0F30D408 %Long 0x0
+	Data.Set EZAXI:0x0F30D40C %Long 0x0
+	Data.Set EZAXI:0x0F30D410 %Long 0x0
+	Data.Set EZAXI:0x0F30D414 %Long 0x0
+	Data.Set EZAXI:0x0F30D418 %Long 0x50000
+	Data.Set EZAXI:0x0F30D41C %Long 0x4000100
+	Data.Set EZAXI:0x0F30D420 %Long 0x55
+	Data.Set EZAXI:0x0F30D424 %Long 0x0
+	Data.Set EZAXI:0x0F30D428 %Long 0x0
+	Data.Set EZAXI:0x0F30D42C %Long 0x0
+	Data.Set EZAXI:0x0F30D430 %Long 0x0
+	Data.Set EZAXI:0x0F30D434 %Long 0x1002000
+	Data.Set EZAXI:0x0F30D438 %Long 0x4001
+	Data.Set EZAXI:0x0F30D43C %Long 0x20028
+	Data.Set EZAXI:0x0F30D440 %Long 0x10100
+	Data.Set EZAXI:0x0F30D444 %Long 0x1
+	Data.Set EZAXI:0x0F30D448 %Long 0x0
+	Data.Set EZAXI:0x0F30D44C %Long 0xF0F0E06
+	Data.Set EZAXI:0x0F30D450 %Long 0x10101
+	Data.Set EZAXI:0x0F30D454 %Long 0x10F0004
+	Data.Set EZAXI:0x0F30D458 %Long 0x0
+	Data.Set EZAXI:0x0F30D45C %Long 0x0
+	Data.Set EZAXI:0x0F30D460 %Long 0x64
+	Data.Set EZAXI:0x0F30D464 %Long 0x0
+	Data.Set EZAXI:0x0F30D468 %Long 0x0
+	Data.Set EZAXI:0x0F30D46C %Long 0x1020103
+	Data.Set EZAXI:0x0F30D470 %Long 0xF020102
+	Data.Set EZAXI:0x0F30D474 %Long 0x3030303
+	Data.Set EZAXI:0x0F30D478 %Long 0x3030303
+	Data.Set EZAXI:0x0F30D47C %Long 0x40000
+	Data.Set EZAXI:0x0F30D480 %Long 0x5201
+	Data.Set EZAXI:0x0F30D484 %Long 0x0
+	Data.Set EZAXI:0x0F30D488 %Long 0x0
+	Data.Set EZAXI:0x0F30D48C %Long 0x0
+	Data.Set EZAXI:0x0F30D490 %Long 0x0
+	Data.Set EZAXI:0x0F30D494 %Long 0x0
+	Data.Set EZAXI:0x0F30D498 %Long 0x0
+	Data.Set EZAXI:0x0F30D49C %Long 0x7070001
+	Data.Set EZAXI:0x0F30D4A0 %Long 0x5400
+	Data.Set EZAXI:0x0F30D4A4 %Long 0x40A2
+	Data.Set EZAXI:0x0F30D4A8 %Long 0x24410
+	Data.Set EZAXI:0x0F30D4AC %Long 0x4410
+	Data.Set EZAXI:0x0F30D4B0 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4B4 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4B8 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4BC %Long 0x4410
+	Data.Set EZAXI:0x0F30D4C0 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4C4 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4C8 %Long 0x4410
+	Data.Set EZAXI:0x0F30D4CC %Long 0x4410
+	Data.Set EZAXI:0x0F30D4D0 %Long 0x0
+	Data.Set EZAXI:0x0F30D4D4 %Long 0x46
+	Data.Set EZAXI:0x0F30D4D8 %Long 0x10000
+	Data.Set EZAXI:0x0F30D4DC %Long 0x8
+	Data.Set EZAXI:0x0F30D4E0 %Long 0x0
+	Data.Set EZAXI:0x0F30D4E4 %Long 0x0
+	Data.Set EZAXI:0x0F30D4E8 %Long 0x0
+	Data.Set EZAXI:0x0F30D4EC %Long 0x0
+	Data.Set EZAXI:0x0F30D4F0 %Long 0x0
+	Data.Set EZAXI:0x0F30D4F4 %Long 0x3000000
+	Data.Set EZAXI:0x0F30D4F8 %Long 0x0
+	Data.Set EZAXI:0x0F30D4FC %Long 0x0
+	Data.Set EZAXI:0x0F30D500 %Long 0x0
+	Data.Set EZAXI:0x0F30D504 %Long 0x4102006
+	Data.Set EZAXI:0x0F30D508 %Long 0x41020
+	Data.Set EZAXI:0x0F30D50C %Long 0x1C98C98
+	Data.Set EZAXI:0x0F30D510 %Long 0x3F400000
+	Data.Set EZAXI:0x0F30D514 %Long 0x3F3F1F3F
+	Data.Set EZAXI:0x0F30D518 %Long 0x1F
+	Data.Set EZAXI:0x0F30D51C %Long 0x0
+	Data.Set EZAXI:0x0F30D520 %Long 0x0
+	Data.Set EZAXI:0x0F30D524 %Long 0x0
+	Data.Set EZAXI:0x0F30D528 %Long 0x1
+	Data.Set EZAXI:0x0F30D52C %Long 0x0
+	Data.Set EZAXI:0x0F30D530 %Long 0x0
+	Data.Set EZAXI:0x0F30D534 %Long 0x0
+	Data.Set EZAXI:0x0F30D538 %Long 0x0
+	Data.Set EZAXI:0x0F30D53C %Long 0x76543210
+	Data.Set EZAXI:0x0F30D540 %Long 0x98
+	Data.Set EZAXI:0x0F30D544 %Long 0x0
+	Data.Set EZAXI:0x0F30D548 %Long 0x0
+	Data.Set EZAXI:0x0F30D54C %Long 0x0
+	Data.Set EZAXI:0x0F30D550 %Long 0x40700
+	Data.Set EZAXI:0x0F30D554 %Long 0x0
+	Data.Set EZAXI:0x0F30D558 %Long 0x0
+	Data.Set EZAXI:0x0F30D55C %Long 0x0
+	Data.Set EZAXI:0x0F30D560 %Long 0x2
+	Data.Set EZAXI:0x0F30D564 %Long 0x100
+	Data.Set EZAXI:0x0F30D568 %Long 0x0
+	Data.Set EZAXI:0x0F30D56C %Long 0x1F7C0
+	Data.Set EZAXI:0x0F30D570 %Long 0x20002
+	Data.Set EZAXI:0x0F30D574 %Long 0x0
+	Data.Set EZAXI:0x0F30D578 %Long 0x1142
+	Data.Set EZAXI:0x0F30D57C %Long 0x3020400
+	Data.Set EZAXI:0x0F30D580 %Long 0x80
+	Data.Set EZAXI:0x0F30D584 %Long 0x3900390
+	Data.Set EZAXI:0x0F30D588 %Long 0x3900390
+	Data.Set EZAXI:0x0F30D58C %Long 0x3900390
+	Data.Set EZAXI:0x0F30D590 %Long 0x3900390
+	Data.Set EZAXI:0x0F30D594 %Long 0x3900390
+	Data.Set EZAXI:0x0F30D598 %Long 0x3900390
+	Data.Set EZAXI:0x0F30D59C %Long 0x300
+	Data.Set EZAXI:0x0F30D5A0 %Long 0x300
+	Data.Set EZAXI:0x0F30D5A4 %Long 0x300
+	Data.Set EZAXI:0x0F30D5A8 %Long 0x300
+	Data.Set EZAXI:0x0F30D5AC %Long 0x31823FC7
+	Data.Set EZAXI:0x0F30D5B0 %Long 0x0
+	Data.Set EZAXI:0x0F30D5B4 %Long 0xC000D3F
+	Data.Set EZAXI:0x0F30D5B8 %Long 0x30000D3F
+	Data.Set EZAXI:0x0F30D5BC %Long 0x300D3F11
+	Data.Set EZAXI:0x0F30D5C0 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5C4 %Long 0xD3FCC
+	Data.Set EZAXI:0x0F30D5C8 %Long 0xC11
+	Data.Set EZAXI:0x0F30D5CC %Long 0x300D3F11
+	Data.Set EZAXI:0x0F30D5D0 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5D4 %Long 0x300C3F11
+	Data.Set EZAXI:0x0F30D5D8 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5DC %Long 0x300C3F11
+	Data.Set EZAXI:0x0F30D5E0 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5E4 %Long 0x300D3F11
+	Data.Set EZAXI:0x0F30D5E8 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5EC %Long 0x300D3F11
+	Data.Set EZAXI:0x0F30D5F0 %Long 0x1990000
+	Data.Set EZAXI:0x0F30D5F4 %Long 0x20040001
+	Data.Set EZAXI:0x0F30D404 %Long 0x10000
+	PRINT "--->>> DDR PHY programming completed... <<<---\n"
+
+	RETURN
+)
+
+
+DDRSS_INIT_SEQUENCE:
+(
+	Do "&AUX_SCRIPT_DIR/configure_pll.cmm" DDR400
+	WAIT 50000.us
+	PRINT "--->>> Set DDR PLL to 400 MHz <<<---"
+	PRINT ""
+
+	; -- trigger the start bit (from PI)
+	; DDRSS_PI_0__SFR_OFFS
+	Data.Set EZAXI:(0x0F308000+0x2000+0x0) %Long 0x00000A01
+	WAIT 500.us
+
+	PRINT "--->>> DDR PI initialization started... <<<---"
+	PRINT ""
+	PRINT "Triggering start bit from CTL..."
+	PRINT ""
+	; DDRSS_CTL_0__SFR_OFFS
+	Data.Set EZAXI:(0x0F308000+0x0) %Long 0x00000A01
+	WAIT 1000.us
+
+	PRINT "--->>> DDR CTL initialization started... <<<---"
+	PRINT ""
+
+	PRINT "Polling PI DONE bit..."
+	PRINT ""
+	; Check DDRSS_PI_83__SFR_OFFS[0]
+	WHILE ((Data.Long(EZAXI:(0x0F308000+0x214c))&0x1)!=0x1)
+	(
+	)
+
+	WAIT 500.us
+
+	; -- Check DDRSS_CTL_342__SFR_OFFS[25]
+	WHILE ((Data.Long(EZAXI:(0x0F308000+0x558))&0x02000000)!=0x02000000)
+	(
+	)
+
+	PRINT "--->>> DDR Initialization completed... <<<---"
+	PRINT ""
+
+	RETURN
+)

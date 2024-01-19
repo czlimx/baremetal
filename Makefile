@@ -48,6 +48,7 @@ LINKS_CFLAGS   := -Tscript/links/${COMPILE_TARGET}.lds \
 				  -fno-builtin -ffreestanding \
 				  -nostdlib -nodefaultlibs \
 				  -nostartfiles -Wl,--gc-sections \
+				  -Wl,--print-memory-usage \
 				  -Wl,-Map=${BIN_DIR}/${COMPILE_TARGET}.map
 
 ######################################

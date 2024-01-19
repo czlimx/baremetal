@@ -1,35 +1,30 @@
 MEMORY
 {
-    .sdram(xrw)  : ORIGIN = 0x70000000, LENGTH = 0x10000
-    .ddram(xrw)  : ORIGIN = 0x80000000, LENGTH = 0x20000000
+    .sdram(xrw)  : ORIGIN = 0x43C00000, LENGTH = 248K
 }
-OUTPUT_FORMAT("elf64-littleaarch64", "elf64-littleaarch64", "elf64-littleaarch64")
-OUTPUT_ARCH(aarch64)
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
+OUTPUT_ARCH(arm)
 ENTRY(_start)
 SECTIONS
 {
-    .vectors : {
-        . = ALIGN(256);
-        KEEP(*(.text.arch.vectors))
-    } >.sdram
-
     .text : {
         . = ALIGN(256);
+        KEEP(*(.text.arch.vectors))
         *(.text.arch.startup)
         *(.text.arch.*)
         *(.text.*)
         *(.text*)
-    } >.ddram
+    } >.sdram
 
     .rodata : {
         . = ALIGN(256);
         *(.rodata*)
-    } >.ddram
+    } >.sdram
 
     .data : {
         . = ALIGN(256);
         *(.data*)
-    } >.ddram
+    } >.sdram
 
     .bss (NOLOAD) : {
         . = ALIGN(256);
@@ -38,20 +33,20 @@ SECTIONS
         *(COMMON)
         . = ALIGN(256);
         _bss_end_   = .;
-    } >.ddram
+    } >.sdram
 
     .stack (NOLOAD) : {
         . = ALIGN(256);
         *(.stack*)
-        . = . + 0x100000;
+        . = . + 0x1000;
         _core0_el3_stack_top = .;
-        . = . + 0x100000;
+        . = . + 0x1000;
         _core1_el3_stack_top = .;
-        . = . + 0x100000;
+        . = . + 0x1000;
         _core2_el3_stack_top = .;
-        . = . + 0x100000;
+        . = . + 0x1000;
         _core3_el3_stack_top = .;
-    } >.ddram
+    } >.sdram
 
  /DISCARD/ : { *(.rela*) }
  /DISCARD/ : { *(.dynsym) }

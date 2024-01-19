@@ -1,0 +1,54 @@
+; --------------------------------------------------------------------------------
+; @Title: Cortex-R5 TCM Runtime Memory Access for AM62X-SKEVM
+; @Description:
+;   The TCMs of the Cortex-R5 are linked to special core local addresses.
+;   Variables linked to those addresses can not be accessed using the access class
+;   E: or the %E formatting flag without prior configuration of the remapping
+;   between the TCM core local and global addresses.
+;     SYStem.Option DAPREMAP
+;   accordingly.
+;   Prerequisites:
+;     * Debug session is connected to AM625X
+;   Usage:
+;     DO <...>/am64x-skevm-cr5_runtime_memory_access.cmm
+;     SYStem.MemAccess DAP
+;     Var.View %E <variable in TCM>
+;     Data.dump E:<address in TCM>
+; @Keywords: AM625X, DAP, *TCM
+; @Author: CMO
+; @Board: AM62X-SKEVM
+; @Chip: AM625X
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: am62x-cr5_runtime_memory_access.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+
+LOCAL &apbase &bpbase &size
+
+IF !CPUIS("AM625X-CR5")
+(
+	PRINT %ERROR "Please select a R5 CPU of AM625X. Exiting ..."
+	ENDDO "FALSE()"
+)
+IF !SYStem.Up()
+(
+	PRINT %ERROR "SYStem.Mode must be Up! Exiting..."
+	ENDDO "FALSE()"
+)
+
+; The R5 has ATCM=32K + BTCM=32K in split mode
+IF CORE.ISASSIGNED(1.)&&CORE.ISASSIGNED(2.)
+(
+        PRINT %WARNING "TCM DAPREMAP is not supported in SMP debug mode"
+        RETURN
+)
+
+&apbase=0x78000000
+&bpbase=0x78100000
+&size=(1024.*32.)
+
+; Remap TCMA and TCMB, can remap up to 16 ranges
+SYStem.MemAccess.DAP
+SYStem.Option DAPREMAP 0x0++&size &apbase   0x41010000++&size &bpbase
+
+ENDDO "TRUE()"

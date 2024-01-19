@@ -1,0 +1,40 @@
+; --------------------------------------------------------------------------------
+; @Props: NoMetaTags
+; @Author: CMO
+; @Copyright: (C) 1989-2022 Lauterbach GmbH, licensed for use with TRACE32(R) only
+; --------------------------------------------------------------------------------
+; $Id: configure_ddr.cmm 19965 2022-10-21 13:10:58Z cmorgenstern $
+
+
+; --------------------------------------------------------------------------------
+; Important:
+;
+; DDR controller configuration prolog. Calls the final DDR controller configuration script.
+;
+; The script applies one of several configuration options to the external DDR memory
+; of the AM62x-SKEVM evaluation board. This script is designed for bare metal setups.
+; It is likely NOT the best fit for the setup of the user.
+;
+; In general, it is recommended to use provided boot code from Texas Instruments
+; to correctly set up the DDR configuration.
+
+PRIVATE &AUX_SCRIPT_DIR
+&AUX_SCRIPT_DIR=OS.PPD()
+
+; --------------------------------------------------------------------------------
+; PLL and Power for DDR related components
+Do "&AUX_SCRIPT_DIR/configure_pll.cmm" DDRBASE
+
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0.  9. 0x1 0x3    ; LPSC_EMIF_LOCAL
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 10. 0x1 0x3    ; LPSC_EMIF_CFG_ISO
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 11. 0x1 0x3    ; LPSC_EMIF_DATA_ISO
+Do "&AUX_SCRIPT_DIR/configure_psc.cmm" 0. 0. 15. 0x1 0x3    ; LPSC_GPMC
+
+
+; --------------------------------------------------------------------------------
+; Actual DDR configuration handled in separate script
+
+DO "&AUX_SCRIPT_DIR/configure_ddr_controller.cmm"
+
+
+ENDDO

@@ -18,7 +18,7 @@
 ; Prepare AMP GUI
 
 ; Close leftover GUIs
-; InterCom OTHERS QUIT
+InterCom OTHERS QUIT
 
 ; Open TIFS GUI
 IF !INTERCOM.PING(TIFS)
