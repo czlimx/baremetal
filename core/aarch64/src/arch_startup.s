@@ -241,11 +241,11 @@ _mmu_early_init:
     ret
 
 /**
- * @brief Architecture early mmu initialization
+ * @brief Architecture early floating pointer initialization
  */
 _floating_early_init:
     mrs x0, CPACR_EL1
-    bic x0, x0, #(3 << 20)      // FPEN: Traps instructions that access registers associated with Advanced SIMD and Floating-point execution
-    orr x0, x0, #(3 << 10)      // 0b11: No instructions are trapped.
+    bic x0, x0, #(3 << 20)
+    orr x0, x0, #(3 << 20)      // FPEN: 0b11 - No instructions are trapped.
     msr CPACR_EL1, x0
     ret

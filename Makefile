@@ -55,20 +55,19 @@ LINKS_CFLAGS   := -Tscript/links/${COMPILE_TARGET}.lds \
 # source
 ######################################
 CC_INCLUDES = \
--Icore/aarch64/include \
--Icore/gic/include
+-Icore/aarch64/include 
 
 ASM_SOURCES = \
 core/aarch64/src/arch_vectors.s \
 core/aarch64/src/arch_startup.s \
 core/aarch64/src/arch_cache.s \
 core/aarch64/src/arch_system.s \
-core/aarch64/src/arch_pmu.s 
+core/aarch64/src/arch_pmu.s \
+core/gic/src/arch_gicd.s
 
 CCC_SOURCES = \
 core/aarch64/src/arch_init.c \
-core/aarch64/src/arch_libc.c \
-core/gic/src/gic_dist.c
+core/aarch64/src/arch_libc.c
 
 #######################################
 # build the application
